@@ -1,0 +1,12 @@
+{
+  "name": "render-agentkit-hacker-news-agent",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@render-agentkit-hacker-news-agent/indexer",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "openai": "^4.76.3",
+    "pg": "^8.13.1",
+    "playwright-core": "^1.49.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/pg": "^8.11.10",
+    "eslint": "^9",
+    "typescript": "^5"
+  }
+}

@@ -136,10 +136,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f6f6ef]">
-      <header className="bg-[#ff6600] p-2">
+      <header className="bg-[#ff6600] p-2 flex justify-between items-center">
         <h1 className="text-black font-bold">
           Hacker News Agent Configuration
         </h1>
+        <button
+          onClick={async () => {
+            await fetch("/api/auth", { method: "DELETE" });
+            window.location.href = "/login";
+          }}
+          className="text-black hover:text-gray-800 text-sm"
+        >
+          Logout
+        </button>
       </header>
 
       <main className="flex-grow max-w-3xl mx-auto w-full p-4 mb-16">

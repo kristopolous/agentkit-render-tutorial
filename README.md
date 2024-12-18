@@ -95,11 +95,13 @@ To set up the Next.js app and AgentKit Network, you need to create a new Web Ser
 2. Configure the _Root Directory_ to `packages/app/`.
 3. Configure the _Build Command_ to `pnpm install; pnpm build`.
 4. Configure the following environment variables:
+
    - `DATABASE_URL`: The URL of your Postgres vector database ([from the Connect button on the Postgres database dashboard](https://render.com/docs/postgresql-creating-connecting#external-connections)).
    - `INNGEST_EVENT_KEY`: The [Event Key of your Inngest project](https://www.inngest.com/docs/events/creating-an-event-key?ref=render-hacker-news-agent-repository).
    - `INNGEST_SIGNING_KEY`: The [Signing Key of your Inngest project](https://www.inngest.com/docs/platform/signing-keys?ref=render-hacker-news-agent-repository).
    - `OPENAI_API_KEY`: Your OpenAI API Key.
    - `RESEND_API_KEY`: Your Resend API Key.
+   - `APP_PASSWORD`: The password to access the app.
 
 You are good to go!
 
@@ -143,6 +145,7 @@ docker push docker.io/wittydeveloper/inngest-render-indexer:0.5
 ### Next.js app (`packages/app`)
 
 > Note: You'll need to set up the `.env.local` file.
+> Don't forget to set the `APP_PASSWORD` password
 
 **Run the Next.js app locally**
 

@@ -18,11 +18,19 @@ export const hackerNewsAgent = inngest.createFunction(
   },
   { event: "hacker-news-agent/run" },
   async ({ event, db, step }) => {
+    console.info("[HackerNewsAgent] Starting execution with data:", {
+      interest_id: event.data.interest_id,
+      question_id: event.data.question_id,
+    });
+
     const { interest_id, question_id } = event.data;
 
     const { interest, question } = await step.run(
       "fetch-interest-and-question",
       async () => {
+        console.info(
+          "[HackerNewsAgent] Fetching interest and question from database"
+        );
         const interest = await db.query(
           "SELECT * FROM interests WHERE id = $1 LIMIT 1",
           [interest_id]
@@ -31,15 +39,22 @@ export const hackerNewsAgent = inngest.createFunction(
           "SELECT * FROM questions WHERE id = $1 LIMIT 1",
           [question_id]
         );
+        console.info("[HackerNewsAgent] Database query results:", {
+          interest: interest.rows[0],
+          question: question.rows[0],
+        });
         return { interest: interest.rows[0], question: question.rows[0] };
       }
     );
 
     if (!interest || !question) {
-      // this question does not longer exists
+      console.warn(
+        "[HackerNewsAgent] Interest or question not found, aborting"
+      );
       return;
     }
 
+    console.info("[HackerNewsAgent] Creating OpenAI model and agents");
     const model = openai({ model: "gpt-4" });
 
     const summarizerAgent = createAgent({
@@ -194,6 +209,11 @@ export const hackerNewsAgent = inngest.createFunction(
       defaultModel: model,
       maxIter: 4,
       defaultRouter: ({ network }) => {
+        console.debug("[HackerNewsAgent] Router state:", {
+          hasAnswers: network?.state.kv.has("answers"),
+          hasSearchResult: network?.state.kv.has("search-result"),
+          hasTrendsResult: network?.state.kv.has("trends-result"),
+        });
         if (network?.state.kv.has("answers")) {
           return;
         } else if (
@@ -206,12 +226,17 @@ export const hackerNewsAgent = inngest.createFunction(
       },
     });
 
+    console.info("[HackerNewsAgent] Starting network execution");
     const result = await network.run(
       `I am passionate about ${interest.name}. Answer the following questions: ${question.question}`
     );
+    console.info("[HackerNewsAgent] Network execution completed", {
+      hasAnswers: result.state.kv.has("answers"),
+    });
 
     if (result.state.kv.has("answers")) {
       await step.run("send-email", async () => {
+        console.info("[HackerNewsAgent] Preparing to send email");
         const answers = result.state.kv.get("answers");
 
         const { data, error } = await resend.emails.send({
@@ -222,15 +247,19 @@ export const hackerNewsAgent = inngest.createFunction(
         });
 
         if (error) {
-          console.error("Error sending email:", error);
+          console.error("[HackerNewsAgent] Error sending email:", error);
           throw error;
         }
-
+        console.info("[HackerNewsAgent] Email sent successfully");
         return data;
       });
     }
 
     const nextRunDate = computeNextRunDate(question.frequency);
+    console.info("[HackerNewsAgent] Scheduling next run", {
+      nextRunDate,
+      frequency: question.frequency,
+    });
 
     await step.sendEvent("schedule-next-run", {
       name: "hacker-news-agent/run",
@@ -240,6 +269,7 @@ export const hackerNewsAgent = inngest.createFunction(
       },
       ts: nextRunDate.getTime(),
     });
+    console.info("[HackerNewsAgent] Function execution completed");
 
     return result;
   }

@@ -96,7 +96,6 @@ export const hackerNewsAgent = inngest.createFunction(
             const answer = ((lastMessage.content as string) || "").match(
               /<answer>([\s\S]*)<\/answer>/
             )?.[1];
-            console.info("!!!!!!!! Summarizer Agent answer:", answer);
             if (answer) {
               network?.state.kv.set("answers", answer);
             }
@@ -119,7 +118,6 @@ export const hackerNewsAgent = inngest.createFunction(
             query: z.string(),
           }),
           handler: async (input, { network }) => {
-            console.info("!!!!!!!! Search Agent starting search:", input.query);
             // Generate embedding for the search query
             const openai = new OpenAI({
               apiKey: process.env.OPENAI_API_KEY,
@@ -159,7 +157,6 @@ export const hackerNewsAgent = inngest.createFunction(
             query: z.string(),
           }),
           handler: async (input, { network }) => {
-            console.info("!!!!!!!! Trends Agent starting search:", input.query);
             // Generate embedding for the query
             const openai = new OpenAI({
               apiKey: process.env.OPENAI_API_KEY,

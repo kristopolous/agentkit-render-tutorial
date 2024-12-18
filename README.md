@@ -113,26 +113,45 @@ The following page should be displayed:
 
 ## Modifying or running the project locally
 
-### Getting Started
-
-1. Install dependencies:
+Install dependencies by running the following command from the root of the project:
 
 ```bash
 pnpm install
 ```
 
-2. Start development servers:
+### Indexer (`packages/indexer`)
+
+**Run the indexer locally**
+
+> Note: You'll need to set up the `.env.local` file.
+
+```bash
+pnpm build
+
+pnpm start
+```
+
+**Push a new Docker image version**
+
+Example:
+
+```bash
+docker build -t docker.io/wittydeveloper/inngest-render-indexer:0.5 .
+docker push docker.io/wittydeveloper/inngest-render-indexer:0.5
+```
+
+### Next.js app (`packages/app`)
+
+> Note: You'll need to set up the `.env.local` file.
+
+**Run the Next.js app locally**
 
 ```bash
 pnpm dev
 ```
 
-This will start both the Next.js application and the indexer in watch mode.
-
-## Building
-
-To build all packages:
+**Start the Inngest Dev Server**
 
 ```bash
-pnpm build
+npx inngest-cli@latest dev
 ```

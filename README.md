@@ -15,58 +15,83 @@
 
 Learn how to build and deploy a Hacker News agent with Inngest, Render, and Next.js.
 
-This Hacker News Agent enables you to enter some interests such as Next.js or Serverless along with a set of questions. Each question get assigned to a frequency at which the AgentKit Network will be triggered to summarize to answer the question based on the latest Hacker News stories fetched by the indexer.
+## What the agent does
+This Hacker News Agent periodically generates a summary of popular articles on Hacker News, and emails you a report.
 
-## Table of contents:
+To use it, you:
+- Specify _questions_ you want answered about specific _topics_.
 
-- [Deploying this project on Render](#deploying-this-project-on-render)
-- [Modifying or running the project locally](#modifying-or-running-the-project-locally)
+    For example, you can specify "Next.js" as a topic, and ask "What are the latest open source libraries?"
+- Specify the _frequency_ at which you want summaries for each question. (E.g. every hour, once a day, once a week)
 
-## Project Structure
+The Agent will do the rest.
 
-- `packages/app`: Next.js application with the Hacker News agent configuration UI and its Inngest AgentKit Network
-- `packages/indexer`: A Cron Job that indexes Hacker News content into a Render Postgres vector database
+![Hacker News Agent](./nextjs-app-preview.png)
 
-## Deploying this project on Render
+## Table of contents
+- [Project structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Deploy this project on Render](#deploy-this-project-on-render)
+- [Modify or run the project locally](#modify-or-run-the-project-locally)
 
-### Prerequisites
+## Project structure
 
-To deploy this project on Render, you need to have the following accounts:
+- `packages/indexer`: A cron job that indexes Hacker News content into a vector database.
 
-- [Render account](https://render.com/)
-- [Inngest account](https://inngest.com/?ref=render-hacker-news-agent-repository)
-- [OpenAI account](https://platform.openai.com/)
-- [Resend account](https://resend.com/)
+    This job is deployed using a [Render Cron Job](https://render.com/docs/cronjobs), and the vector database is a Render PostgreSQL database that has the [`pgvector` extension enabled](https://render.com/docs/postgresql-extensions).
+- `packages/app`: A web app that includes the UI to configure topics and questions for the Hacker News agent, and the backend logic for the agents.
 
-### 1. Set up the Postgres vector database
+   This app is written in Next.js and hosted as a [web service](https://render.com/docs/web-services) on Render. The app uses [Inngest's AgentKit](https://agentkit.inngest.com/overview) to create and orchestrate agents. To use Inngest's terminology, we'll refer to the combination of routing logic, agents, and tools as the _AgentKit Network_.
 
-_The Postgres vector database is used to store the Hacker News stories and to serve as the vector database for the AgentKit Network._
+## Prerequisites
+### Accounts
+To run this project, you need the following accounts:
 
-<br/>
+- [Render account](https://render.com/?utm_source=inngest-hn-agent-repo): host and scale web applications
+- [Inngest account](https://inngest.com/?ref=render-hacker-news-agent-repository): workflow and agent orchestration
+- [OpenAI account](https://platform.openai.com/): API for LLM
+- [Resend account](https://resend.com/): API to send email
 
-To set up the Postgres vector database, you need to create a new Postgres database on Render and initialize it with the provided schema.
+### Github code
+Before you get started, git clone this repo to your local machine.
 
-1. [Create a Project on Render](https://render.com/docs/projects#setup).
+## Deploy this project on Render
 
-2. Then, from your project, [Create a new Postgres database on Render](https://render.com/docs/postgresql-creating-connecting#create-your-database).
+### 1. Set up the PostgreSQL vector database
 
-3. Initialize the database with the provided schema
+#### What it's for
+The PostgreSQL database is used to store Hacker News stories. It serves as the vector database for the AgentKit Network.
 
-First, you'll need to clone this project locally to get the schema.sql file.
+#### Steps
+To set up this database, you'll create a new PostgreSQL database on Render, enable the `pgvector` extension on the database, and initialize it with our project's schema.
 
-Then, to initialize the database with the provided schema, copy the psql command provided from the [Postgres database dashboard (for external connections)](https://render.com/docs/postgresql-creating-connecting#external-connections) and run it in your terminal as follows from the root of the project:
+Follow these steps:
 
-```bash
-psql -Atx postgresql://<redacted>@<redacted>.render.com/<redacted> -f packages/indexer/schema.sql
-```
+1. [Create a Project on Render](https://render.com/docs/projects#setup). Name it "Hacker News Agent".
+
+2. [Create a new PostgreSQL database on Render](https://render.com/docs/postgresql-creating-connecting#create-your-database).
+
+    - For the "Project", specify the project you created in Step 1.
+    - For the "Instance Type", you may use the Free plan.
+
+3. Enable the pgvector extension and initialize the database with the project's schema.
+
+    - 3.1. Locate the `schema.sql` file in this repo. (This file contains the commands to enable the pgvector extension and set up this project's schema.)
+    - 3.2. Copy your database's [external database URL](https://render.com/docs/postgresql-creating-connecting#external-connections) from the Render dashboard.
+    - 3.3. Run the following command in your terminal from the root of the project, but replace the dummy PostgreSQL URL with your URL from Step 3.2:
+
+      ```bash
+      psql -Atx postgresql://<redacted>@<redacted>.render.com/<redacted> -f packages/indexer/schema.sql
+      ```
 
 ### 2. Set up the Indexer service Cron Job
 
-_The Indexer service is used to fetch Hacker News stories and to store them in the Postgres vector database._
+#### What it's for
+The Indexer service is used to fetch Hacker News stories and to store them in the PostgreSQL vector database.
 
-<br/>
+#### Steps
 
-The `packages/indexer` directory contains a `indexer.ts` file that will index Hacker News content into the Postgres vector database.
+The `packages/indexer` directory contains a `indexer.ts` file that will index Hacker News content into the PostgreSQL vector database.
 
 To set up the Indexer service Cron Job, you need to create a new Cron Job on Render using a Docker image set up with playwright and its chromium binary.
 
@@ -76,16 +101,17 @@ The `docker.io/wittydeveloper/inngest-render-indexer:0.4` image is available pub
    " field.
 2. Configure the _Schedule_ to run on a daily basis: `0 0 \* \* \*`.
 3. Configure the following environment variables:
-   - `DATABASE_URL`: The URL of your Postgres vector database ([from the Connect button on the Postgres database dashboard](https://render.com/docs/postgresql-creating-connecting#external-connections)).
+   - `DATABASE_URL`: The URL of your PostgreSQL vector database ([from the Connect button on the PostgreSQL database dashboard](https://render.com/docs/postgresql-creating-connecting#external-connections)).
    - `OPENAI_API_KEY`: Your OpenAI API Key.
 
 You are good to go!
 
 ### 3. Set up the Next.js app and AgentKit Network
 
-_The Next.js app and AgentKit Network is used to serve as the frontend to configure the Hacker News agent and as backend to run the AgentKit Network._
+#### What it's for
+The Next.js app and AgentKit Network is used to serve as the frontend to configure the Hacker News agent and as backend to run the AgentKit Network.
 
-<br/>
+#### Steps
 
 The `packages/app` directory contains a Next.js application that will serve as the frontend for the Hacker News agent.
 
@@ -96,7 +122,7 @@ To set up the Next.js app and AgentKit Network, you need to create a new Web Ser
 3. Configure the _Build Command_ to `pnpm install; pnpm build`.
 4. Configure the following environment variables:
 
-   - `DATABASE_URL`: The URL of your Postgres vector database ([from the Connect button on the Postgres database dashboard](https://render.com/docs/postgresql-creating-connecting#external-connections)).
+   - `DATABASE_URL`: The URL of your PostgreSQL vector database ([from the Connect button on the PostgreSQL database dashboard](https://render.com/docs/postgresql-creating-connecting#external-connections)).
    - `INNGEST_EVENT_KEY`: The [Event Key of your Inngest project](https://www.inngest.com/docs/events/creating-an-event-key?ref=render-hacker-news-agent-repository).
    - `INNGEST_SIGNING_KEY`: The [Signing Key of your Inngest project](https://www.inngest.com/docs/platform/signing-keys?ref=render-hacker-news-agent-repository).
    - `OPENAI_API_KEY`: Your OpenAI API Key.
@@ -113,7 +139,7 @@ The following page should be displayed:
 
 ![Hacker News Agent](./nextjs-app-preview.png)
 
-## Modifying or running the project locally
+## Modify or run the project locally
 
 Install dependencies by running the following command from the root of the project:
 

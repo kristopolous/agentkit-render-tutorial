@@ -63,7 +63,7 @@ Before you get started, git clone this repo to your local machine.
 The PostgreSQL database is used to store Hacker News stories. It serves as the vector database for the AgentKit Network.
 
 #### Steps
-To set up this database, you'll create a new PostgreSQL database on Render, enable the `pgvector` extension on the database, and initialize it with our project's schema.
+To set up this database, we'll create a new PostgreSQL database on Render, enable the `pgvector` extension on the database, and initialize it with our project's schema.
 
 Follow these steps:
 
@@ -84,27 +84,29 @@ Follow these steps:
       psql -Atx postgresql://<redacted>@<redacted>.render.com/<redacted> -f packages/indexer/schema.sql
       ```
 
-### 2. Set up the Indexer service Cron Job
+### 2. Set up the Indexer cron job
 
 #### What it's for
-The Indexer service is used to fetch Hacker News stories and to store them in the PostgreSQL vector database.
+The Indexer service fetches Hacker News stories and stores them in the PostgreSQL vector database.
 
 #### Steps
 
-The `packages/indexer` directory contains a `indexer.ts` file that will index Hacker News content into the PostgreSQL vector database.
+We will set up the Indexer service as a cron job on Render. (Render offers a Cron Job service type.)
 
-To set up the Indexer service Cron Job, you need to create a new Cron Job on Render using a Docker image set up with playwright and its chromium binary.
+This cron job is packaged as a Docker image that is configured with Playwright and its Chromium binary. For your convenience, we've made this Docker image publicly available on Docker Hub. The image name is `docker.io/wittydeveloper/inngest-render-indexer:0.4`.
 
-The `docker.io/wittydeveloper/inngest-render-indexer:0.4` image is available publicly on Docker Hub for this project:
+1. Create a new cron job on Render [using these instructions](https://render.com/docs/cronjobs#setup).
+    - Use the "Existing image" option and provide the following "Image URL": `docker.io/wittydeveloper/inngest-render-indexer:0.4`.
+    - Configure the _Schedule_ to run on a daily basis: `0 0 * * *`.
+    - Configure the following environment variables:
+       - `DATABASE_URL`: The internal URL of your PostgreSQL database ([here's how to find it](https://render.com/docs/postgresql-creating-connecting#internal-connections)).
+       - `OPENAI_API_KEY`: Your OpenAI API key.
+2. (optional) To see a sample run, [manually trigger a run](https://render.com/docs/cronjobs#manually-triggering-a-run) of your cron job. Note that the cron job will not fetch any stories from Hacker News yet. You'll need to set up the Next.js app (next step), and specify some "interests" to track via the app's UI.
 
-1. [Create a new Cron Job on Render](https://render.com/docs/cronjobs#setup) using the "Existing image" option by pasting the image URL `docker.io/wittydeveloper/inngest-render-indexer:0.4` in the "Image URL
-   " field.
-2. Configure the _Schedule_ to run on a daily basis: `0 0 \* \* \*`.
-3. Configure the following environment variables:
-   - `DATABASE_URL`: The URL of your PostgreSQL vector database ([from the Connect button on the PostgreSQL database dashboard](https://render.com/docs/postgresql-creating-connecting#external-connections)).
-   - `OPENAI_API_KEY`: Your OpenAI API Key.
+#### About the code
+The Docker image is built from the `Dockerfile` at the root of this project.
 
-You are good to go!
+See the `packages/indexer` directory for the source code.
 
 ### 3. Set up the Next.js app and AgentKit Network
 

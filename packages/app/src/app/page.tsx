@@ -25,6 +25,11 @@ const FREQUENCY_OPTIONS = [
 export default function Home() {
   const [interests, setInterests] = useState<Interest[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
+    null
+  );
+  const [previewContent, setPreviewContent] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [newInterest, setNewInterest] = useState({ name: "", email: "" });
   const [newQuestion, setNewQuestion] = useState({
     interest_id: 0,
@@ -37,6 +42,14 @@ export default function Home() {
     fetchInterests();
     fetchQuestions();
   }, []);
+
+  useEffect(() => {
+    if (selectedQuestionId) {
+      fetchPreview(selectedQuestionId);
+    } else {
+      setPreviewContent(null);
+    }
+  }, [selectedQuestionId]);
 
   const fetchInterests = async () => {
     try {
@@ -131,6 +144,58 @@ export default function Home() {
     } catch (err) {
       setError("Failed to remove question");
       console.error(err);
+    }
+  };
+
+  const fetchPreview = async (questionId: number) => {
+    setIsLoadingPreview(true);
+    setPreviewContent(null);
+    try {
+      const question = questions.find((q) => q.id === questionId);
+      if (!question) return;
+
+      // First trigger a new preview
+      const triggerResponse = await fetch("/api/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questionId,
+          interestId: question.interest_id,
+        }),
+      });
+
+      if (!triggerResponse.ok) throw new Error("Failed to trigger preview");
+      const { runId } = await triggerResponse.json();
+
+      // Poll for the preview content
+      const pollInterval = setInterval(async () => {
+        try {
+          const previewResponse = await fetch(`/api/preview?id=${runId}`);
+          if (!previewResponse.ok) throw new Error("Failed to fetch preview");
+          const data = await previewResponse.json();
+
+          if (data.finished) {
+            clearInterval(pollInterval);
+            setPreviewContent(data.preview);
+            setIsLoadingPreview(false);
+          }
+        } catch (err) {
+          console.error("Preview polling error:", err);
+        }
+      }, 2000); // Poll every 2 seconds
+
+      // Cleanup interval after 30 seconds to prevent infinite polling
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (isLoadingPreview) {
+          setIsLoadingPreview(false);
+          setError("Preview generation timed out");
+        }
+      }, 30000);
+    } catch (err) {
+      setError("Failed to load preview");
+      console.error(err);
+      setIsLoadingPreview(false);
     }
   };
 
@@ -292,6 +357,12 @@ export default function Home() {
                   </span>
                 </span>
                 <button
+                  onClick={() => setSelectedQuestionId(question.id)}
+                  className="text-[#828282] hover:text-black mr-2"
+                >
+                  [preview]
+                </button>
+                <button
                   onClick={() => removeQuestion(question.id)}
                   className="text-[#828282] hover:text-black ml-2"
                 >
@@ -300,6 +371,40 @@ export default function Home() {
               </li>
             ))}
           </ul>
+
+          {/* Preview Zone */}
+          {selectedQuestionId && (
+            <div className="mt-8 p-4 border border-[#ff6600] rounded">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="text-md font-semibold">Preview</h3>
+                  <p className="text-sm text-[#828282] mt-1">
+                    {
+                      questions.find((q) => q.id === selectedQuestionId)
+                        ?.question
+                    }
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedQuestionId(null)}
+                  className="text-[#828282] hover:text-black"
+                >
+                  [close]
+                </button>
+              </div>
+              <div className="text-[#828282]">
+                {isLoadingPreview ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-[#ff6600] border-t-transparent"></div>
+                  </div>
+                ) : previewContent ? (
+                  <div className="whitespace-pre-wrap">{previewContent}</div>
+                ) : (
+                  <div>No preview available yet</div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

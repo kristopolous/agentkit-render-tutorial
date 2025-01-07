@@ -236,38 +236,39 @@ export const hackerNewsAgent = inngest.createFunction(
         console.info("[HackerNewsAgent] Preparing to send email");
         const answers = result.state.kv.get("answers");
 
-        const { data, error } = await resend.emails.send({
-          from: "Hacker News Agent <onboarding@resend.dev>",
-          to: interest.email,
-          subject: `Your Hacker News Agent Update on ${interest.name}`,
-          text: `Here are the answers to "${question.question}":\n\n${answers}`,
-        });
+        if (!event.data.preview) {
+          const { data, error } = await resend.emails.send({
+            from: "Hacker News Agent <onboarding@resend.dev>",
+            to: interest.email,
+            subject: `Your Hacker News Agent Update on ${interest.name}`,
+            text: `Here are the answers to "${question.question}":\n\n${answers}`,
+          });
 
-        if (error) {
-          console.error("[HackerNewsAgent] Error sending email:", error);
-          throw error;
+          if (error) {
+            console.error("[HackerNewsAgent] Error sending email:", error);
+            throw error;
+          }
+          console.info("[HackerNewsAgent] Email sent successfully");
+          return data;
         }
-        console.info("[HackerNewsAgent] Email sent successfully");
-        return data;
+      });
+
+      const nextRunDate = computeNextRunDate(question.frequency);
+      console.info("[HackerNewsAgent] Scheduling next run", {
+        nextRunDate,
+        frequency: question.frequency,
+      });
+      await step.sendEvent("schedule-next-run", {
+        name: "hacker-news-agent/run",
+        data: {
+          interest_id,
+          question_id,
+        },
+        ts: nextRunDate.getTime(),
       });
     }
-
-    const nextRunDate = computeNextRunDate(question.frequency);
-    console.info("[HackerNewsAgent] Scheduling next run", {
-      nextRunDate,
-      frequency: question.frequency,
-    });
-
-    await step.sendEvent("schedule-next-run", {
-      name: "hacker-news-agent/run",
-      data: {
-        interest_id,
-        question_id,
-      },
-      ts: nextRunDate.getTime(),
-    });
     console.info("[HackerNewsAgent] Function execution completed");
 
-    return result;
+    return { answers: result.state.kv.get("answers") };
   }
 );

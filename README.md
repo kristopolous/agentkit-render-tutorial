@@ -157,13 +157,12 @@ You're now ready to try out your Hacker News Agent.
 
 1. Go to your Render Web Service dashboard and click on the URL of your web service (ex: https://agenkit-render-tutorial.onrender.com).
 2. Log into your app using the `APP_PASSWORD` you specified. You'll then see the homepage.
-3. Add an interest and an email address where you want email updates to be sent. Then add a question for your Hacker News Agent to answer for you and specify the frequency at which you want the Agent to update you.
-
-![Hacker News Agent](./images/nextjs-app-preview.png)
+3. Add an interest and an email address where you want email updates to be sent. Then add a question for your Hacker News Agent to answer for you and specify the frequency at which you want the Agent to update you. <br/>
+<img src="./images/nextjs-app-preview.png" width="600" alt="app homepage" />
 
 4. [Manually trigger a run](https://render.com/docs/cronjobs#manually-triggering-a-run) of your Indexer cron job.
-    - In the cron job's logs, you'll see a log line for each Hacker News story that's stored into the database.
-    ![Cron job logs](./images/cron-job-logs.png)
+    - In the cron job's logs, you'll see a log line for each Hacker News story that's stored into the database. <br/>
+    <img src="./images/cron-job-logs.png" width="600" alt="Cron job logs"/>
 
 5. Sit back and wait for the next time your Agent runs. The Agent will run based on the frequency you specified for your question(s).
 

@@ -140,19 +140,29 @@ To set up the app, we'll create a new web service on Render and configure it to 
 
 After the deploy finishes, your service will be accessible at the `onrender.com` URL displayed in the dashboard.
 
-### 4. Try it out!
+### 4. Sync the Inngest app
+
+Each time you deploy a new app that uses Inngest, or update your Inngest functions, you must [sync  the app](https://www.inngest.com/docs/apps/cloud) with Inngest.
+
+Inngest offers several ways to sync an app. Here, we'll sync the app manually through the Inngest dashboard.
+
+1. Open your Inngest dashboard.
+2. Click **Sync new app** (or [visit this link](https://app.inngest.com/env/production/apps/sync-new)).
+3. Choose the **Sync manually** option, and provide the following app URL: `https://<your-app-name>.onrender.com/api/inngest`
+4. Click **Sync app**.
+
+### 5. Try it out!
 
 You're now ready to try out your Hacker News Agent.
 
 1. Go to your Render Web Service dashboard and click on the URL of your web service (ex: https://agenkit-render-tutorial.onrender.com).
 2. Log into your app using the `APP_PASSWORD` you specified. You'll then see the homepage.
-3. Add an interest and an email address where you want email updates to be sent. Then add a question for your Hacker News Agent to answer for you and specify the frequency at which you want the Agent to update you.
-
-![Hacker News Agent](./images/nextjs-app-preview.png)
+3. Add an interest and an email address where you want email updates to be sent. Then add a question for your Hacker News Agent to answer for you and specify the frequency at which you want the Agent to update you. <br/>
+<img src="./images/nextjs-app-preview.png" width="600" alt="app homepage" />
 
 4. [Manually trigger a run](https://render.com/docs/cronjobs#manually-triggering-a-run) of your Indexer cron job.
-    - In the cron job's logs, you'll see a log line for each Hacker News story that's stored into the database.
-    ![Cron job logs](./images/cron-job-logs.png)
+    - In the cron job's logs, you'll see a log line for each Hacker News story that's stored into the database. <br/>
+    <img src="./images/cron-job-logs.png" width="600" alt="Cron job logs"/>
 
 5. Sit back and wait for the next time your Agent runs. The Agent will run based on the frequency you specified for your question(s).
 

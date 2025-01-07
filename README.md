@@ -140,7 +140,18 @@ To set up the app, we'll create a new web service on Render and configure it to 
 
 After the deploy finishes, your service will be accessible at the `onrender.com` URL displayed in the dashboard.
 
-### 4. Try it out!
+### 4. Sync the Inngest app
+
+Each time you deploy a new app that uses Inngest, or update your Inngest functions, you must [sync  the app](https://www.inngest.com/docs/apps/cloud) with Inngest.
+
+Inngest offers several ways to sync an app. Here, we'll sync the app manually through the Inngest dashboard.
+
+1. Open your Inngest dashboard.
+2. Click **Sync new app** (or [visit this link](https://app.inngest.com/env/production/apps/sync-new)).
+3. Choose the **Sync manually** option, and provide the following app URL: `https://<your-app-name>.onrender.com/api/inngest`
+4. Click **Sync app**.
+
+### 5. Try it out!
 
 You're now ready to try out your Hacker News Agent.
 

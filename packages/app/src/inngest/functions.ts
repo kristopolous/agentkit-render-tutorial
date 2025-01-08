@@ -9,7 +9,7 @@ import {
 } from "@inngest/agent-kit";
 
 import { inngest } from "./client";
-import { computeNextRunDate } from "./utils";
+import { computeNextRunDate, frequencyToRelativeHuman } from "./utils";
 import { resend } from "../lib/resend";
 
 export const hackerNewsAgent = inngest.createFunction(
@@ -108,16 +108,22 @@ export const hackerNewsAgent = inngest.createFunction(
     const searchAgent = createAgent({
       name: "Search Agent",
       description: "Search Hacker News for a given set of interests",
-      system:
-        "You are a search agent that searches Hacker News for posts that are relevant to a given set of interests",
+      system: `You are a search agent that searches Hacker News for posts that are relevant to a given set of interests. Today is ${
+        new Date().toISOString().split("T")[0]
+      }. Search for posts from the last ${frequencyToRelativeHuman(
+        question.frequency
+      )} period.`,
       tools: [
         createTool({
           name: "search",
           description: "Search Hacker News for a given set of interests",
           parameters: z.object({
             query: z.string(),
+            startDate: z.string(),
+            endDate: z.string(),
           }),
           handler: async (input, { network }) => {
+            console.info("[HackerNewsAgent] Searching for stories", input);
             // Generate embedding for the search query
             const openai = new OpenAI({
               apiKey: process.env.OPENAI_API_KEY,
@@ -130,19 +136,32 @@ export const hackerNewsAgent = inngest.createFunction(
 
             // Perform vector similarity search
             const searchResults = await db.query(
-              `SELECT title, content, date, comments,
+              `SELECT title, content, TO_CHAR(date::date, 'MM/DD/YYYY') as date, comments,
                 (embedding <=> $1::vector) as distance
               FROM stories
               WHERE interest_id = $2
+              AND date >= $3::date
+              AND date <= $4::date
               ORDER BY distance ASC
               LIMIT 5`,
-              [`[${embedding.data[0].embedding.join(",")}]`, interest.id]
+              [
+                `[${embedding.data[0].embedding.join(",")}]`,
+                interest.id,
+                input.startDate,
+                input.endDate,
+              ]
             );
 
             // Format results
             const result = searchResults.rows.map(
               (row) =>
                 `Title: ${row.title}\nContent: ${row.content}\nDate: ${row.date}\nComments: ${row.comments}\n\n`
+            );
+
+            console.info(
+              "[HackerNewsAgent] Search results:",
+              input.query,
+              result.length
             );
 
             network?.state.kv.set("search-result", result);
@@ -156,8 +175,11 @@ export const hackerNewsAgent = inngest.createFunction(
             "Identify trends on Hacker News for a given set of interests",
           parameters: z.object({
             query: z.string(),
+            startDate: z.string(),
+            endDate: z.string(),
           }),
           handler: async (input, { network }) => {
+            console.info("[HackerNewsAgent] Identifying trends", input);
             // Generate embedding for the query
             const openai = new OpenAI({
               apiKey: process.env.OPENAI_API_KEY,
@@ -171,22 +193,29 @@ export const hackerNewsAgent = inngest.createFunction(
             // Find similar stories using vector similarity
             const similarStories = await db.query(
               `WITH similar_stories AS (
-                SELECT title, content, date, comments,
+                SELECT title, content, date::timestamp as date, comments,
                   (embedding <=> $1::vector) as distance
                 FROM stories
                 WHERE (embedding <=> $1::vector) < 0.3
                 AND interest_id = $2
+                AND date >= $3::date
+                AND date <= $4::date
                 ORDER BY date DESC
               )
               SELECT 
-                date_trunc('day', TO_TIMESTAMP(date, 'MM/DD/YYYY')) as story_date,
+                date_trunc('day', date) as story_date,
                 COUNT(*) as story_count,
                 STRING_AGG(title, ' | ' ORDER BY date DESC) as titles
               FROM similar_stories
-              GROUP BY date_trunc('day', TO_TIMESTAMP(date, 'MM/DD/YYYY'))
+              GROUP BY date_trunc('day', date)
               ORDER BY story_date DESC
               LIMIT 10`,
-              [`[${embedding.data[0].embedding.join(",")}]`, interest.id]
+              [
+                `[${embedding.data[0].embedding.join(",")}]`,
+                interest.id,
+                input.startDate,
+                input.endDate,
+              ]
             );
 
             // Format results to show trends
@@ -194,6 +223,12 @@ export const hackerNewsAgent = inngest.createFunction(
               const date = new Date(row.story_date).toLocaleDateString();
               return `Date: ${date}\nNumber of Related Stories: ${row.story_count}\nTitles: ${row.titles}\n\n`;
             });
+
+            console.info(
+              "[HackerNewsAgent] Trends results:",
+              input.query,
+              result.length
+            );
 
             network?.state.kv.set("trends-result", result);
 
@@ -233,7 +268,7 @@ export const hackerNewsAgent = inngest.createFunction(
       hasAnswers: result.state.kv.has("answers"),
     });
 
-    if (result.state.kv.has("answers")) {
+    if (result.state.kv.has("answers") && !event.data.preview) {
       await step.run("send-email", async () => {
         console.info("[HackerNewsAgent] Preparing to send email");
         const answers = result.state.kv.get("answers");
@@ -271,6 +306,15 @@ export const hackerNewsAgent = inngest.createFunction(
     }
     console.info("[HackerNewsAgent] Function execution completed");
 
-    return { answers: result.state.kv.get("answers") };
+    return {
+      answers:
+        result.state.kv.get("answers") ||
+        (
+          result.state.results[
+            result.state.results.length - 1
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ].output.pop() as any
+        ).content,
+    };
   }
 );

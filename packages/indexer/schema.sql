@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS stories (
   id SERIAL PRIMARY KEY,
   title TEXT,
   content TEXT,
-  date TEXT,
+  date DATE,
   comments TEXT,
   interest_id INTEGER REFERENCES interests(id),
   embedding vector(1536)

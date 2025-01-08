@@ -37,7 +37,7 @@ async function generateEmbedding(text: string): Promise<number[]> {
 export async function storeStory(story: Story): Promise<void> {
   // Check if story already exists
   const existingStory = await client.query(
-    "SELECT id FROM stories WHERE title = $1 AND date = $2",
+    "SELECT id FROM stories WHERE title = $1 AND date = $2::date",
     [story.title, story.date]
   );
 
@@ -51,7 +51,7 @@ export async function storeStory(story: Story): Promise<void> {
 
   // Insert new story
   await client.query(
-    "INSERT INTO stories (title, content, date, comments, embedding, interest_id) VALUES ($1, $2, $3, $4, $5::vector, $6)",
+    "INSERT INTO stories (title, content, date, comments, embedding, interest_id) VALUES ($1, $2, $3::date, $4, $5::vector, $6)",
     [
       story.title,
       story.content,

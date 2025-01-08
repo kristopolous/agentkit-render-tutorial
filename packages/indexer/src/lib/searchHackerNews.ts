@@ -41,7 +41,7 @@ export const searchHackerNews = async (
         const content = contentEl?.textContent || "";
 
         // Get date
-        const dateEl = story.querySelector(".Story_meta span:nth-of-type(3)");
+        const dateEl = story.querySelector(".Story_meta span:nth-of-type(5)");
         const date = dateEl?.textContent || "";
         // Convert relative time to actual date
         const now = new Date();

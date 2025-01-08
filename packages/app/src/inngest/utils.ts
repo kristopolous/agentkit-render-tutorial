@@ -1,4 +1,19 @@
-type FrequencyString = "hourly" | "daily" | "weekly" | "monthly";
+export type FrequencyString = "hourly" | "daily" | "weekly" | "monthly";
+
+export function frequencyToRelativeHuman(frequency: FrequencyString): string {
+  switch (frequency) {
+    case "hourly":
+      return "last hour";
+    case "daily":
+      return "last day";
+    case "weekly":
+      return "last week";
+    case "monthly":
+      return "last month";
+    default:
+      return "last month";
+  }
+}
 
 /**
  * Computes the next run date based on a frequency string

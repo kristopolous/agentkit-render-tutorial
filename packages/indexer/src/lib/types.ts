@@ -3,4 +3,5 @@ export interface Story {
   content: string;
   date: string;
   comments: string;
+  interest_id: number;
 }

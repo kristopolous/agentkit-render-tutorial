@@ -21,8 +21,14 @@ async function main() {
       // Search for stories
       const results = await searchHackerNews(interest.name);
 
+      // Add interest_id to each story
+      const storiesWithInterestId = results.map((story) => ({
+        ...story,
+        interest_id: interest.id,
+      }));
+
       // Store stories in the database
-      await storeStories(results);
+      await storeStories(storiesWithInterestId);
 
       console.info(
         `Successfully processed ${results.length} stories for interest: ${interest.name}`

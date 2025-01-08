@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS stories (
   content TEXT,
   date TEXT,
   comments TEXT,
+  interest_id INTEGER REFERENCES interests(id),
   embedding vector(1536)
 );
 

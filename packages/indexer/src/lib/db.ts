@@ -51,13 +51,14 @@ export async function storeStory(story: Story): Promise<void> {
 
   // Insert new story
   await client.query(
-    "INSERT INTO stories (title, content, date, comments, embedding) VALUES ($1, $2, $3, $4, $5::vector)",
+    "INSERT INTO stories (title, content, date, comments, embedding, interest_id) VALUES ($1, $2, $3, $4, $5::vector, $6)",
     [
       story.title,
       story.content,
       story.date,
       story.comments,
       `[${embedding.join(",")}]`,
+      story.interest_id,
     ]
   );
 

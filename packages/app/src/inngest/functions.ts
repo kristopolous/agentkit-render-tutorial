@@ -133,9 +133,10 @@ export const hackerNewsAgent = inngest.createFunction(
               `SELECT title, content, date, comments,
                 (embedding <=> $1::vector) as distance
               FROM stories
+              WHERE interest_id = $2
               ORDER BY distance ASC
               LIMIT 5`,
-              [`[${embedding.data[0].embedding.join(",")}]`]
+              [`[${embedding.data[0].embedding.join(",")}]`, interest.id]
             );
 
             // Format results
@@ -174,6 +175,7 @@ export const hackerNewsAgent = inngest.createFunction(
                   (embedding <=> $1::vector) as distance
                 FROM stories
                 WHERE (embedding <=> $1::vector) < 0.3
+                AND interest_id = $2
                 ORDER BY date DESC
               )
               SELECT 
@@ -184,7 +186,7 @@ export const hackerNewsAgent = inngest.createFunction(
               GROUP BY date_trunc('day', TO_TIMESTAMP(date, 'MM/DD/YYYY'))
               ORDER BY story_date DESC
               LIMIT 10`,
-              [`[${embedding.data[0].embedding.join(",")}]`]
+              [`[${embedding.data[0].embedding.join(",")}]`, interest.id]
             );
 
             // Format results to show trends

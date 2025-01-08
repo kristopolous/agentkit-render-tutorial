@@ -1,7 +1,9 @@
 import { chromium } from "playwright-core";
 import { Story } from "./types";
 
-export const searchHackerNews = async (query: string): Promise<Story[]> => {
+export const searchHackerNews = async (
+  query: string
+): Promise<Omit<Story, "interest_id">[]> => {
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -49,6 +51,7 @@ export const searchHackerNews = async (query: string): Promise<Story[]> => {
 
         let finalDate = now;
         if (match) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const [_, amount, unit] = match;
           const value = parseInt(amount);
 

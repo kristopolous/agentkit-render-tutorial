@@ -164,7 +164,7 @@ You're now ready to try out your Hacker News Agent.
     - In the cron job's logs, you'll see a log line for each Hacker News story that's stored into the database. <br/>
     <img src="./images/cron-job-logs.png" width="600" alt="Cron job logs"/>
 
-5. Sit back and wait for the next time your Agent runs. The Agent will run based on the frequency you specified for your question(s).
+5. Try out the app. You can sit back and wait for the next time your Agent runs, which will be determined by the frequency you specified for your question(s). If you want an instant result, click "[ preview ]" next to any question in the UI. 
 
 ## Modify or run the project locally
 

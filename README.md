@@ -130,7 +130,7 @@ To set up the app, we'll create a new web service on Render and configure it to 
         | Start Command | `pnpm start` |
 
     3. Configure the following environment variables:
-        - `DATABASE_URL`: The _internal URL_ of your PostgreSQL vector database ([here's how to find it](https://render.com/docs/postgresql-creating-connecting#internal-connections)).
+        - `DATABASE_URL`: The _external URL_ of your PostgreSQL vector database ([here's how to find it](https://render.com/docs/postgresql-creating-connecting#external-connections)). (Note: technically we should use the internal URL here, but our code currently does not parse the internal DB url.)
         - `INNGEST_EVENT_KEY`: The [Event Key of your Inngest project](https://www.inngest.com/docs/events/creating-an-event-key?ref=render-hacker-news-agent-repository).
         - `INNGEST_SIGNING_KEY`: The [Signing Key of your Inngest project](https://www.inngest.com/docs/platform/signing-keys?ref=render-hacker-news-agent-repository).
         - `OPENAI_API_KEY`: Your OpenAI API Key.

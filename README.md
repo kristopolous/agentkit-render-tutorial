@@ -128,7 +128,7 @@ To set up the app, we'll create a new web service on Render and configure it to 
         | Root Directory | `packages/app/` |
         | Build Command | `pnpm install; pnpm build` |
         | Start Command | `pnpm start` |
-
+        | Instance type | Starter (this app runs too slowly on the Free plan) |
     3. Configure the following environment variables:
         - `DATABASE_URL`: The _external URL_ of your PostgreSQL vector database ([here's how to find it](https://render.com/docs/postgresql-creating-connecting#external-connections)). (Note: technically we should use the internal URL here, but our code currently does not parse the internal DB url.)
         - `INNGEST_EVENT_KEY`: The [Event Key of your Inngest project](https://www.inngest.com/docs/events/creating-an-event-key?ref=render-hacker-news-agent-repository).

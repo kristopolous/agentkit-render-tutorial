@@ -1,11 +1,12 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import { openai } from "inngest";
+
 import {
   createAgent,
   createNetwork,
   createTool,
   getDefaultRoutingAgent,
+  openai,
 } from "@inngest/agent-kit";
 
 import { inngest } from "./client";
@@ -239,7 +240,8 @@ export const hackerNewsAgent = inngest.createFunction(
     });
 
     const network = createNetwork({
-      agents: [searchAgent.withModel(model), summarizerAgent.withModel(model)],
+      name: "HackerNewsAgent",
+      agents: [searchAgent, summarizerAgent],
       defaultModel: model,
       maxIter: 4,
       defaultRouter: ({ network }) => {

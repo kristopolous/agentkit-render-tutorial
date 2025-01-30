@@ -15,6 +15,9 @@
 
 Learn how to build and deploy a Hacker News agent with Inngest, Render, and Next.js.
 
+## Read the blog post
+Read our [blog post](https://render.com/blog/hacker-news-ai-agent-inngest-render) for full details about this agent.
+
 ## What the agent does
 This Hacker News Agent periodically generates a summary of popular articles on Hacker News, and emails you a report.
 

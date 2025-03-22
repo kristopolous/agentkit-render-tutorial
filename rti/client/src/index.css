@@ -1,0 +1,624 @@
+:root {
+  --dark-bg: #0a0a0f;
+  --dark-bg-secondary: #121224;
+  --dark-bg-tertiary: #1a1a2e;
+  --text-primary: #FFFFFF;
+  --text-secondary: #a9b8d8;
+  --accent-neon: #00f7ff;
+  --accent-neon-purple: #bd00ff;
+  --accent-neon-glow: 0 0 10px rgba(0, 247, 255, 0.7);
+  --accent-purple-glow: 0 0 10px rgba(189, 0, 255, 0.7);
+  --sidebar-width: 280px;
+  --video-height: 150px;
+  --navbar-height: 60px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.app-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: var(--navbar-height);
+  width: calc(100% - var(--sidebar-width));
+  background-color: rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  border-bottom: 1px solid rgba(74, 55, 165, 0.2);
+}
+
+
+
+.stytch-logo {
+  transition: all 0.3s ease;
+}
+
+.login-button {
+  background-color: rgba(74, 55, 165, 0.1);
+  color: var(--text-primary);
+  border: 1px solid #4A37A5;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-button .stytch-logo {
+  width: 60px;
+  height: 20px;
+}
+
+.login-text {
+  font-weight: 500;
+}
+
+.login-button:hover {
+  background-color: rgba(74, 55, 165, 0.2);
+  box-shadow: 0 0 10px rgba(74, 55, 165, 0.3);
+}
+
+.login-popover {
+  position: absolute;
+  top: calc(var(--navbar-height) + 10px);
+  right: 30px;
+  background-color: var(--dark-bg-tertiary);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(74, 55, 165, 0.3);
+  padding: 0;
+  width: 320px;
+  z-index: 30;
+  border: 1px solid rgba(74, 55, 165, 0.3);
+  transform-origin: top right;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.login-popover.active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: all;
+}
+
+.stytch-header {
+  background: linear-gradient(135deg, #3a2b8e 0%, #4A37A5 100%);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stytch-header .stytch-logo {
+  width: 120px;
+  height: 40px;
+  filter: brightness(1.2);
+}
+
+.login-popover-title {
+  font-size: 18px;
+  margin: 0;
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+
+
+.sso-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.sso-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.sso-option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #4A37A5;
+  box-shadow: 0 0 10px rgba(74, 55, 165, 0.2);
+}
+
+.stytch-footer {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stytch-footer span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.stytch-footer .stytch-logo {
+  width: 60px;
+  height: 20px;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--dark-bg-tertiary);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10;
+}
+
+.video-placeholder {
+  height: var(--video-height);
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.video-placeholder::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-neon), transparent);
+  animation: scanline 3s linear infinite;
+}
+
+.video-placeholder::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-neon-purple), transparent);
+  animation: scanline 4s linear infinite reverse;
+}
+
+.phone-call-request {
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.phone-call-request h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: var(--accent-neon);
+  text-shadow: var(--accent-neon-glow);
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+
+.phone-call-request .input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.phone-call-request input {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 10px 12px;
+  border-radius: 4px;
+  color: var(--text-primary);
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.phone-call-request input:focus {
+  outline: none;
+  border-color: var(--accent-neon);
+  box-shadow: 0 0 0 1px var(--accent-neon), 0 0 8px rgba(0, 247, 255, 0.4);
+}
+
+.phone-call-request .call-button {
+  background-color: rgba(0, 247, 255, 0.1);
+  color: var(--accent-neon);
+  text-shadow: var(--accent-neon-glow);
+  border: 1px solid var(--accent-neon);
+  border-radius: 4px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(0, 247, 255, 0.1);
+}
+
+.phone-call-request .call-button:hover {
+  background-color: rgba(0, 247, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 247, 255, 0.2);
+}
+
+.phone-call-request .call-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.phone-call-request .message {
+  margin-top: 12px;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--accent-neon-purple);
+  border-left: 3px solid var(--accent-neon-purple);
+  box-shadow: 0 0 10px rgba(189, 0, 255, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.phone-call-request .message:empty {
+  display: none;
+}
+
+@keyframes scanline {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.roles-section {
+  flex: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.roles-header {
+  padding: 0 20px 15px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-neon);
+  border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-shadow: var(--accent-neon-glow);
+  position: relative;
+}
+
+.roles-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 20px;
+  width: 40px;
+  height: 2px;
+  background-color: var(--accent-neon);
+  box-shadow: var(--accent-neon-glow);
+}
+
+.role-button {
+  display: block;
+  padding: 12px 20px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.role-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.role-button.active {
+  background-color: rgba(0, 247, 255, 0.1);
+  color: var(--accent-neon);
+  border-left: 3px solid var(--accent-neon);
+  box-shadow: inset 0 0 5px rgba(0, 247, 255, 0.3);
+  text-shadow: var(--accent-neon-glow);
+}
+
+.powered-by {
+  padding: 15px 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  margin-top: var(--navbar-height);
+  flex: 1;
+  padding: 40px;
+  background-color: var(--dark-bg-secondary);
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.docs-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.docs-title {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.docs-title h1 {
+  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.docs-title p {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+.docs-section {
+  margin-bottom: 40px;
+}
+
+.docs-section h2 {
+  color: var(--accent-neon);
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-shadow: var(--accent-neon-glow);
+}
+
+.docs-section p {
+  margin-bottom: 15px;
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+.code-block {
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 25px;
+  border-radius: 8px;
+  margin: 25px 0;
+  font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 14px;
+  overflow-x: auto;
+  border: 1px solid rgba(0, 247, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
+}
+
+.code-line {
+  display: block;
+  line-height: 1.6;
+}
+
+.code-comment {
+  color: #8B949E;
+}
+
+.code-keyword {
+  color: var(--accent-neon);
+  text-shadow: 0 0 5px rgba(0, 247, 255, 0.5);
+}
+
+.code-string {
+  color: var(--accent-neon-purple);
+  text-shadow: 0 0 5px rgba(189, 0, 255, 0.5);
+}
+
+.code-function {
+  color: #ffffff;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Markdown Code Block Styling */
+.markdown-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.markdown-content pre {
+  margin: 1.5em 0;
+  padding: 1em;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(0, 247, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 247, 255, 0.1);
+  font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, monospace;
+  overflow-x: auto;
+}
+
+.markdown-content code {
+  font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content p code,
+.markdown-content li code {
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  color: var(--accent-neon);
+  font-size: 0.9em;
+}
+
+.markdown-content h1, 
+.markdown-content h2, 
+.markdown-content h3, 
+.markdown-content h4, 
+.markdown-content h5, 
+.markdown-content h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+  color: var(--text-primary);
+}
+
+.markdown-content h2 {
+  color: var(--accent-neon);
+  text-shadow: var(--accent-neon-glow);
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.markdown-content blockquote {
+  margin: 1.5em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--accent-neon-purple);
+  background-color: rgba(0, 0, 0, 0.3);
+  font-style: italic;
+}
+
+.markdown-content a {
+  color: var(--accent-neon);
+  text-decoration: none;
+  transition: text-shadow 0.3s;
+}
+
+.markdown-content a:hover {
+  text-shadow: var(--accent-neon-glow);
+}
+
+/* Fix Prism.js token colors to match our theme */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #8B949E;
+}
+
+.token.punctuation {
+  color: #c9d1d9;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #79c0ff;
+}
+
+.token.boolean,
+.token.number {
+  color: #a5d6ff;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: var(--accent-neon-purple);
+  text-shadow: 0 0 5px rgba(189, 0, 255, 0.3);
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #f1fa8c;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: var(--accent-neon);
+  text-shadow: 0 0 5px rgba(0, 247, 255, 0.3);
+}
+
+.token.function,
+.token.class-name {
+  color: #e2c08d;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #ffa657;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .app-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .roles-section {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .role-button {
+    width: auto;
+    padding: 10px 15px;
+  }
+
+  .roles-header {
+    width: 100%;
+  }
+}

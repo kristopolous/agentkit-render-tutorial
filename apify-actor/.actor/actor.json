@@ -1,0 +1,58 @@
+{
+	"actorSpecification": 1,
+	"name": "furnicular",
+	"version": "0.3",
+	"buildTag": "latest",
+	"environmentVariables": {
+		"OPENROUTER_API_KEY": ""
+	},
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "views": {
+        "overview": {
+          "title": "Overview",
+          "transformation": {
+            "fields": [
+              "question",
+              "userContext",
+              "previousResponse",
+              "documentation",
+              "model",
+              "preview"
+            ]
+          },
+          "display": {
+            "component": "table",
+            "properties": {
+              "question": {
+                "label": "Question",
+                "format": "text"
+              },
+              "userContext": {
+                "label": "User Context",
+                "format": "text"
+              },
+              "previousResponse": {
+                "label": "Previous Response",
+                "format": "text"
+              },
+              "documentation": {
+                "label": "Documentation",
+                "format": "text"
+              },
+              "model": {
+                "label": "Model",
+                "format": "text"
+              },
+              "preview": {
+                "label": "Preview",
+                "format": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

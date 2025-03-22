@@ -9,8 +9,8 @@ function VideoPlaceholder() {
       }}>
         <div style={{ 
           position: 'absolute',
-          width: '60px',
-          height: '60px',
+          width: '180px',
+          height: '180px',
           borderRadius: '50%',
           border: '2px solid var(--accent-neon)',
           boxShadow: 'var(--accent-neon-glow)',

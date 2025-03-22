@@ -12,8 +12,8 @@ function App() {
       const popover = document.querySelector('.login-popover');
       const loginButton = document.querySelector('.login-button');
       
-      if (popover && popover.classList.contains('active') && 
-          !popover.contains(event.target) && 
+      if (popover && popover.classList.contains('active') &&
+          !popover.contains(event.target) &&
           !loginButton.contains(event.target)) {
         popover.classList.remove('active');
       }

@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
   if (result.finished && result.items.length > 0) {
     return NextResponse.json({
       finished: true,
-      preview: result.items[0].answer,
+      preview: result.items[0].documentation,
     });
   } else {
     return NextResponse.json({
@@ -72,12 +72,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Start the actor run
+    console.info("[SendaiAgent] Starting preview run with data:", {
+      question,
+      model,
+    });
+    
+    // Start the actor run with preview flag
     const run = await apifyClient.actor(process.env.SENDAI_ACTOR_ID || '').call({
       question,
       model, // Pass the model if provided
+      preview: true, // Add preview flag to indicate this is a preview run
     });
 
+    console.info(`[SendaiAgent] Preview run started with ID: ${run.id}`);
     return NextResponse.json({ runId: run.id });
   } catch (error) {
     console.error('Error starting actor run:', error);

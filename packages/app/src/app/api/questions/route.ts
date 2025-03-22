@@ -33,11 +33,27 @@ export async function POST(request: Request) {
 
     // Schedule the Apify Actor run
     try {
+      console.info("[SendaiAgent] Starting execution with data:", {
+        interest_id,
+        question_id: newQuestion.id,
+        question,
+        model,
+      });
+      
       // First, run the actor immediately
-      const answer = await runSendaiActor(question, model);
-      console.log('Initial actor run completed with answer:', answer);
+      console.info("[SendaiAgent] Running actor immediately");
+      const documentation = await runSendaiActor(question, model);
+      console.info("[SendaiAgent] Initial actor run completed", {
+        documentationLength: documentation ? documentation.length : 0,
+      });
       
       // Then, schedule a future run using Apify's schedules
+      const nextRunDate = computeNextRunDate(frequency);
+      console.info("[SendaiAgent] Scheduling next run", {
+        nextRunDate,
+        frequency,
+      });
+      
       const schedule = await apifyClient.schedules().create({
         name: `Question ${newQuestion.id} - ${frequency}`,
         cronExpression: frequencyToCron(frequency),
@@ -52,9 +68,9 @@ export async function POST(request: Request) {
         }],
       });
       
-      console.log(`Scheduled future runs with ID: ${schedule.id}`);
+      console.info(`[SendaiAgent] Scheduled future runs with ID: ${schedule.id}`);
     } catch (error) {
-      console.error('Error scheduling Apify Actor:', error);
+      console.error('[SendaiAgent] Error scheduling Apify Actor:', error);
       // Continue with the response even if scheduling fails
     }
 

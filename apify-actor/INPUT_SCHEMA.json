@@ -14,7 +14,7 @@
       "type": "string",
       "description": "The OpenRouter model to use for answering the question",
       "editor": "select",
-      "default": "anthropic/claude-3-opus",
+      "default": "google/gemini-2.0-pro-exp-02-05:free",
       "enum": [
         "anthropic/claude-3-opus",
         "anthropic/claude-3-sonnet",
@@ -22,7 +22,7 @@
         "openai/gpt-4-turbo",
         "openai/gpt-4o",
         "openai/gpt-3.5-turbo",
-        "google/gemini-pro",
+        "google/gemini-2.0-pro-exp-02-05:free",
         "meta-llama/llama-3-70b-instruct"
       ],
       "enumTitles": [
@@ -35,6 +35,12 @@
         "Gemini Pro",
         "Llama 3 70B"
       ]
+    },
+    "preview": {
+      "title": "Preview",
+      "type": "boolean",
+      "description": "Whether this is a preview run (will not save documentation to file)",
+      "default": false
     }
   },
   "required": ["question"]

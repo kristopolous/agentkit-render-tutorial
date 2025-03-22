@@ -5,6 +5,7 @@
   "dependencies": {
     "apify": "^3.1.13",
     "cheerio": "^1.0.0-rc.12",
+    "crawlee": "*",
     "node-fetch": "^3.3.2",
     "pg": "^8.11.3"
   },

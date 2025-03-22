@@ -8,8 +8,8 @@ export const apifyClient = new ApifyClient({
 // Actor ID for the Sendai documentation agent
 export const SENDAI_ACTOR_ID = process.env.SENDAI_ACTOR_ID || 'your-actor-id';
 
-// Default model to use with OpenRouter
-export const DEFAULT_MODEL = process.env.DEFAULT_MODEL || 'anthropic/claude-3-opus';
+// Default model to use with OpenRouter (Gemini 2.0 Pro has a 2 million token context window)
+export const DEFAULT_MODEL = process.env.DEFAULT_MODEL || 'google/gemini-2.0-pro-exp-02-05:free';
 
 // Function to run the Sendai documentation agent
 export async function runSendaiActor(question: string, model: string = DEFAULT_MODEL) {
@@ -35,8 +35,8 @@ export async function runSendaiActor(question: string, model: string = DEFAULT_M
       return null;
     }
     
-    // Return the answer
-    return items[0].answer;
+    // Return the documentation
+    return items[0].documentation;
   } catch (error) {
     console.error('Error running Sendai actor:', error);
     throw error;

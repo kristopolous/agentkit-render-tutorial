@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { apifyClient } from "@/lib/apify";
-import { resend } from "@/lib/resend";
+import fs from 'fs';
+import path from 'path';
 
 /**
  * This route handles Apify webhook callbacks.
@@ -41,30 +42,62 @@ export async function POST(request: Request) {
       );
     }
 
-    const answer = items[0].answer;
+    const documentation = items[0].documentation;
     const question = items[0].question;
+    const model = items[0].model;
+    const isPreview = items[0].preview === true;
     
-    // Get the email from the run input (if available)
-    const email = run.input?.email;
+    console.info("[SendaiAgent] Processing webhook for run:", {
+      runId,
+      question,
+      model,
+      isPreview,
+      documentationLength: documentation ? documentation.length : 0,
+    });
     
-    if (email) {
-      // Send the email
-      const { data, error } = await resend.emails.send({
-        from: "Sendai Documentation Agent <onboarding@resend.dev>",
-        to: email,
-        subject: `Your Sendai Documentation Update`,
-        text: `Here are the answers to "${question}":\n\n${answer}`,
-      });
-
-      if (error) {
-        console.error("Error sending email:", error);
-        return NextResponse.json(
-          { error: "Failed to send email" },
-          { status: 500 }
-        );
-      }
+    // If this is a preview run, don't save the file
+    if (isPreview) {
+      console.info("[SendaiAgent] Preview run, skipping file save");
+      return NextResponse.json({ success: true, preview: true });
+    }
+    
+    // Create a filename based on the question
+    const sanitizedQuestion = question
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 50);
+    
+    const filename = `${sanitizedQuestion}-${Date.now()}.md`;
+    
+    // Create docs directory if it doesn't exist
+    const docsDir = path.join(process.cwd(), 'docs');
+    if (!fs.existsSync(docsDir)) {
+      fs.mkdirSync(docsDir, { recursive: true });
+    }
+    
+    // Write the documentation to a file
+    try {
+      const filePath = path.join(docsDir, filename);
       
-      console.log("Email sent successfully");
+      // Add metadata at the top of the file
+      const fileContent = `---
+title: ${question}
+model: ${model}
+date: ${new Date().toISOString()}
+---
+
+${documentation}`;
+      
+      fs.writeFileSync(filePath, fileContent);
+      console.info(`[SendaiAgent] Documentation saved to: ${filePath}`);
+    } catch (error) {
+      console.error("[SendaiAgent] Error saving documentation to file:", error);
+      return NextResponse.json(
+        { error: "Failed to save documentation" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true });

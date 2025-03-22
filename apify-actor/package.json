@@ -1,0 +1,14 @@
+{
+  "name": "apify-hacker-news-agent",
+  "version": "0.0.1",
+  "type": "module",
+  "dependencies": {
+    "apify": "^3.1.13",
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.11.3"
+  },
+  "scripts": {
+    "start": "node main.js"
+  }
+}

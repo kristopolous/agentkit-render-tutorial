@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // List of paths that don't require authentication
-const publicPaths = ["/login", "/api/auth", "/api/inngest"];
+const publicPaths = ["/login", "/api/auth", "/api/apify"];
 
 export function middleware(request: NextRequest) {
   const isAuthenticated = request.cookies.has("auth");

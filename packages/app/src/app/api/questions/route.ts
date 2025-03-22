@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getQuestions, createQuestion, deleteQuestion } from "@/lib/db";
-import { inngest } from "@/inngest/client";
-import { computeNextRunDate } from "@/inngest/utils";
+import { apifyClient, SENDAI_ACTOR_ID, runSendaiActor } from "@/lib/apify";
+import { computeNextRunDate } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -31,14 +31,31 @@ export async function POST(request: Request) {
 
     const nextRunDate = computeNextRunDate(frequency);
 
-    inngest.send({
-      name: "hacker-news-agent/run",
-      ts: nextRunDate.getTime(),
-      data: {
-        interest_id,
-        question_id: newQuestion.id,
-      },
-    });
+    // Schedule the Apify Actor run
+    try {
+      // First, run the actor immediately
+      const answer = await runSendaiActor(question);
+      console.log('Initial actor run completed with answer:', answer);
+      
+      // Then, schedule a future run using Apify's schedules
+      const schedule = await apifyClient.schedules().create({
+        name: `Question ${newQuestion.id} - ${frequency}`,
+        cronExpression: frequencyToCron(frequency),
+        isEnabled: true,
+        actions: [{
+          type: 'RUN_ACTOR',
+          actorId: SENDAI_ACTOR_ID,
+          input: {
+            question,
+          },
+        }],
+      });
+      
+      console.log(`Scheduled future runs with ID: ${schedule.id}`);
+    } catch (error) {
+      console.error('Error scheduling Apify Actor:', error);
+      // Continue with the response even if scheduling fails
+    }
 
     return NextResponse.json(newQuestion);
   } catch (error) {

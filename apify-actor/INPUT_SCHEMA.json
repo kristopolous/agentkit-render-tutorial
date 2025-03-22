@@ -1,0 +1,41 @@
+{
+  "title": "Sendai Documentation Query",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "question": {
+      "title": "Question",
+      "type": "string",
+      "description": "The question you want to ask about the Sendai API documentation",
+      "editor": "textfield"
+    },
+    "model": {
+      "title": "Model",
+      "type": "string",
+      "description": "The OpenRouter model to use for answering the question",
+      "editor": "select",
+      "default": "anthropic/claude-3-opus",
+      "enum": [
+        "anthropic/claude-3-opus",
+        "anthropic/claude-3-sonnet",
+        "anthropic/claude-3-haiku",
+        "openai/gpt-4-turbo",
+        "openai/gpt-4o",
+        "openai/gpt-3.5-turbo",
+        "google/gemini-pro",
+        "meta-llama/llama-3-70b-instruct"
+      ],
+      "enumTitles": [
+        "Claude 3 Opus",
+        "Claude 3 Sonnet",
+        "Claude 3 Haiku",
+        "GPT-4 Turbo",
+        "GPT-4o",
+        "GPT-3.5 Turbo",
+        "Gemini Pro",
+        "Llama 3 70B"
+      ]
+    }
+  },
+  "required": ["question"]
+}

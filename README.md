@@ -1,35 +1,30 @@
-# Hacker News Agent with Render and Inngest
+# Sendai Documentation Agent with Render and Apify
 
 <p align="center">
 
-![Hacker News Agent](./images/architecture.png)
+![Sendai Documentation Agent](./images/architecture.png)
 
 </p>
 
 <p align="center">
     <a href="https://www.render.com/docs/">Render docs</a>
     <span>&nbsp;·&nbsp;</span>
-    <a href="https://agentkit.inngest.com/overview?ref=render-hacker-news-agent-repository">Inngest Agent Kit docs</a>
+    <a href="https://apify.com/docs">Apify docs</a>
 </p>
 <br/>
 
-Learn how to build and deploy a Hacker News agent with Inngest, Render, and Next.js.
-
-## Read the blog post
-Read our [blog post](https://render.com/blog/hacker-news-ai-agent-inngest-render) for full details about this agent.
+Learn how to build and deploy a Sendai Documentation agent with Apify, Render, and Next.js.
 
 ## What the agent does
-This Hacker News Agent periodically generates a summary of popular articles on Hacker News, and emails you a report.
+This Sendai Documentation Agent periodically scrapes the Sendai API documentation and answers your questions about it, then emails you a report.
 
 To use it, you:
-- Specify _questions_ you want answered about specific _interests_.
-
-    For example, you can specify "Next.js" as an interest, and ask "What are the latest open source libraries?"
-- Specify the _frequency_ at which you want summaries for each question. (E.g. every hour, once a day, once a week)
+- Specify _questions_ you want answered about the Sendai API documentation.
+- Specify the _frequency_ at which you want answers for each question. (E.g. every hour, once a day, once a week)
 
 The Agent will do the rest.
 
-![Hacker News Agent](./images/nextjs-app-preview.png)
+![Sendai Documentation Agent](./images/nextjs-app-preview.png)
 
 ## Table of contents
 - [Project structure](#project-structure)
@@ -39,20 +34,20 @@ The Agent will do the rest.
 
 ## Project structure
 
-- `packages/indexer`: A cron job that indexes Hacker News content into a vector database.
+- `apify-actor`: An Apify Actor that scrapes the Sendai API documentation and answers questions about it.
 
-    This job is deployed using a [Render Cron Job](https://render.com/docs/cronjobs), and the vector database is a Render PostgreSQL database that has the [`pgvector` extension enabled](https://render.com/docs/postgresql-extensions).
-- `packages/app`: A web app that includes the UI to configure topics and questions for the Hacker News agent, and the backend logic for the agents.
+    This Actor is deployed on the Apify platform and can be scheduled to run periodically.
+- `packages/app`: A web app that includes the UI to configure topics and questions for the Sendai Documentation agent, and the backend logic for interacting with the Apify Actor.
 
-   This app is written in Next.js and hosted as a [web service](https://render.com/docs/web-services) on Render. The app uses [Inngest's AgentKit](https://agentkit.inngest.com/overview) to create and orchestrate agents. To use Inngest's terminology, we'll refer to the combination of routing logic, agents, and tools as the _AgentKit Network_.
+   This app is written in Next.js and hosted as a [web service](https://render.com/docs/web-services) on Render.
 
 ## Prerequisites
 ### Accounts
 To run this project, you need the following accounts:
 
-- [Render account](https://render.com/?utm_source=inngest-hn-agent-repo): host and scale web applications
-- [Inngest account](https://inngest.com/?ref=render-hacker-news-agent-repository): workflow and agent orchestration
-- [OpenAI account](https://platform.openai.com/): API for LLM
+- [Render account](https://render.com/): host and scale web applications
+- [Apify account](https://apify.com/): web scraping and automation platform
+- [OpenRouter account](https://openrouter.ai/): Free API for accessing various LLMs
 - [Resend account](https://resend.com/): API to send email
 
 ### Github code
@@ -62,26 +57,26 @@ Then git clone your forked repo to your local machine.
 
 ## Deploy this project on Render
 
-### 1. Set up the PostgreSQL vector database
+### 1. Set up the PostgreSQL database
 
 #### What it's for
-The PostgreSQL database is used to store Hacker News stories. It serves as the vector database for the AgentKit Network.
+The PostgreSQL database is used to store user interests and questions.
 
 #### Steps
-To set up this database, we'll create a new PostgreSQL database on Render, enable the `pgvector` extension on the database, and initialize it with our project's schema.
+To set up this database, we'll create a new PostgreSQL database on Render and initialize it with our project's schema.
 
 Follow these steps:
 
-1. [Create a Project on Render](https://render.com/docs/projects#setup). Name it "Hacker News Agent".
+1. [Create a Project on Render](https://render.com/docs/projects#setup). Name it "Sendai Documentation Agent".
 
 2. [Create a new PostgreSQL database on Render](https://render.com/docs/postgresql-creating-connecting#create-your-database).
 
     - For the "Project", specify the project you created in Step 1.
     - For the "Instance Type", you may use the Free plan.
 
-3. Enable the pgvector extension and initialize the database with the project's schema.
+3. Initialize the database with the project's schema.
 
-    - 3.1. Locate the `schema.sql` file in this repo. (This file contains the commands to enable the pgvector extension and set up this project's schema.)
+    - 3.1. Locate the `schema.sql` file in this repo.
     - 3.2. Copy your database's [external database URL](https://render.com/docs/postgresql-creating-connecting#external-connections) from the Render dashboard.
     - 3.3. Run the following command in your terminal from the root of the project, but replace the dummy PostgreSQL URL with your URL from Step 3.2:
 
@@ -89,34 +84,34 @@ Follow these steps:
       psql -Atx postgresql://<redacted>@<redacted>.render.com/<redacted> -f packages/indexer/schema.sql
       ```
 
-### 2. Set up the Indexer cron job
+### 2. Set up the Apify Actor
 
 #### What it's for
-The Indexer service fetches Hacker News stories and stores them in the PostgreSQL vector database.
+The Apify Actor scrapes the Sendai API documentation and answers questions about it using OpenRouter's API to access various LLMs.
 
 #### Steps
 
-We will set up the Indexer service as a cron job on Render. (Render offers a Cron Job service type.)
+1. Create an Apify account if you don't already have one.
+2. Create a new Actor on Apify:
+   1. Go to the [Apify Console](https://console.apify.com/).
+   2. Click on "Actors" in the left sidebar.
+   3. Click "Create new" to create a new Actor.
+   4. Name your Actor "sendai-documentation-agent".
+   5. Choose "Use custom Dockerfile" as the source.
+   6. Upload the files from the `apify-actor` directory in this repo.
+   7. Set the following environment variables:
+       - `OPENROUTER_API_KEY`: Your OpenRouter API key.
+   8. Click "Save" to create the Actor.
+3. Note your Actor's ID (you'll need it later).
+4. Create an Apify API token:
+   1. Go to your [Apify account settings](https://console.apify.com/account/integrations).
+   2. Create a new API token.
+   3. Note the token (you'll need it later).
 
-This cron job is packaged as a Docker image that is configured with Playwright and its Chromium binary. For your convenience, we've made this Docker image publicly available on Docker Hub.
-
-1. Create a new cron job on Render [using these instructions](https://render.com/docs/cronjobs#setup).
-    1. Choose the **Existing image** option and provide the following **Image URL**: `docker.io/wittydeveloper/inngest-render-indexer:0.6`.
-    2. Configure the **Schedule** to run on an hourly basis: `0 * * * *`.
-    3. Configure the following environment variables:
-       - `DATABASE_URL`: The _internal URL_ of your PostgreSQL database ([here's how to find it](https://render.com/docs/postgresql-creating-connecting#internal-connections)).
-       - `OPENAI_API_KEY`: Your OpenAI API key.
-2. (optional) To see a sample run, [manually trigger a run](https://render.com/docs/cronjobs#manually-triggering-a-run) of your cron job. Note that the cron job will not fetch any stories from Hacker News yet. You'll need to set up the Next.js app (next step), and specify some "interests" to track via the app's UI.
-
-#### About the code
-The Docker image is built from the `Dockerfile` at the root of this project.
-
-See the `packages/indexer` directory for the source code.
-
-### 3. Set up the Next.js app with AgentKit Network
+### 3. Set up the Next.js app
 
 #### What it's for
-The Next.js app serves the UI that lets you configure the Hacker News agent with "interests" you want to track. The app's backend hosts the logic of the AgentKit Network.
+The Next.js app serves the UI that lets you configure the Sendai Documentation agent with questions you want answered. The app's backend interacts with the Apify Actor.
 
 #### Steps
 
@@ -133,41 +128,40 @@ To set up the app, we'll create a new web service on Render and configure it to 
         | Start Command | `pnpm start` |
         | Instance type | Starter (this app runs too slowly on the Free plan) |
     3. Configure the following environment variables:
-        - `DATABASE_URL`: The _external URL_ of your PostgreSQL vector database ([here's how to find it](https://render.com/docs/postgresql-creating-connecting#external-connections)). (Note: technically we should use the internal URL here, but our code currently does not parse the internal DB url.)
-        - `INNGEST_EVENT_KEY`: The [Event Key of your Inngest project](https://www.inngest.com/docs/events/creating-an-event-key?ref=render-hacker-news-agent-repository).
-        - `INNGEST_SIGNING_KEY`: The [Signing Key of your Inngest project](https://www.inngest.com/docs/platform/signing-keys?ref=render-hacker-news-agent-repository).
-        - `OPENAI_API_KEY`: Your OpenAI API Key.
+        - `DATABASE_URL`: The _external URL_ of your PostgreSQL database ([here's how to find it](https://render.com/docs/postgresql-creating-connecting#external-connections)).
+        - `OPENROUTER_API_KEY`: Your OpenRouter API Key.
         - `RESEND_API_KEY`: Your Resend API Key.
+        - `APIFY_API_TOKEN`: Your Apify API token.
+        - `SENDAI_ACTOR_ID`: Your Apify Actor ID.
         - `APP_PASSWORD`: A custom password. You must enter this password to gain access to your app.
 2. Click **Deploy Web Service**.
 
 After the deploy finishes, your service will be accessible at the `onrender.com` URL displayed in the dashboard.
 
-### 4. Sync the Inngest app
+### 4. Set up Apify Webhooks
 
-Each time you deploy a new app that uses Inngest, or update your Inngest functions, you must [sync  the app](https://www.inngest.com/docs/apps/cloud) with Inngest.
+To enable automatic email notifications when the Apify Actor completes a run, we need to set up a webhook.
 
-Inngest offers several ways to sync an app. Here, we'll sync the app manually through the Inngest dashboard.
-
-1. Open your Inngest dashboard.
-2. Click **Sync new app** (or [visit this link](https://app.inngest.com/env/production/apps/sync-new)).
-3. Choose the **Sync manually** option, and provide the following app URL: `https://<your-app-name>.onrender.com/api/inngest`
-4. Click **Sync app**.
+1. Go to your [Apify Console](https://console.apify.com/).
+2. Click on "Webhooks" in the left sidebar.
+3. Click "Create new webhook".
+4. Configure the webhook:
+   - Name: "Sendai Documentation Agent Webhook"
+   - Event types: Select "Actor run succeeded"
+   - Actions: Select your "sendai-documentation-agent" Actor
+   - Request URL: `https://<your-app-name>.onrender.com/api/apify`
+   - Payload template: Leave as default
+5. Click "Save" to create the webhook.
 
 ### 5. Try it out!
 
-You're now ready to try out your Hacker News Agent.
+You're now ready to try out your Sendai Documentation Agent.
 
-1. Go to your Render Web Service dashboard and click on the URL of your web service (ex: https://agenkit-render-tutorial.onrender.com).
+1. Go to your Render Web Service dashboard and click on the URL of your web service (ex: https://sendai-documentation-agent.onrender.com).
 2. Log into your app using the `APP_PASSWORD` you specified. You'll then see the homepage.
-3. Add an interest and an email address where you want email updates to be sent. Then add a question for your Hacker News Agent to answer for you and specify the frequency at which you want the Agent to update you. <br/>
-<img src="./images/nextjs-app-preview.png" width="600" alt="app homepage" />
+3. Add an interest and an email address where you want email updates to be sent. Then add a question for your Sendai Documentation Agent to answer for you and specify the frequency at which you want the Agent to update you.
 
-4. [Manually trigger a run](https://render.com/docs/cronjobs#manually-triggering-a-run) of your Indexer cron job.
-    - In the cron job's logs, you'll see a log line for each Hacker News story that's stored into the database. <br/>
-    <img src="./images/cron-job-logs.png" width="600" alt="Cron job logs"/>
-
-5. Try out the app. You can sit back and wait for the next time your Agent runs, which will be determined by the frequency you specified for your question(s). If you want an instant result, click "[ preview ]" next to any question in the UI. 
+4. Try out the app. You can sit back and wait for the next time your Agent runs, which will be determined by the frequency you specified for your question(s). If you want an instant result, click "[ preview ]" next to any question in the UI. 
 
 ## Modify or run the project locally
 
@@ -177,25 +171,37 @@ Install dependencies by running the following command from the root of the proje
 pnpm install
 ```
 
-### Indexer (`packages/indexer`)
+### Apify Actor (`apify-actor`)
 
-**Run the indexer locally**
+**Run the Apify Actor locally**
 
-> Note: You'll need to set up the `.env.local` file.
+> Note: You'll need to set up the `.env` file with your `OPENROUTER_API_KEY`.
 
 ```bash
-pnpm build
-
-pnpm start
+cd apify-actor
+npm install
+OPENROUTER_API_KEY=your_api_key node main.js
 ```
 
-**Push a new Docker image version**
+**Deploy the Apify Actor**
 
-Example:
+1. Install the Apify CLI:
 
 ```bash
-docker build -t docker.io/wittydeveloper/inngest-render-indexer:0.5 .
-docker push docker.io/wittydeveloper/inngest-render-indexer:0.5
+npm install -g apify-cli
+```
+
+2. Log in to your Apify account:
+
+```bash
+apify login
+```
+
+3. Deploy the Actor:
+
+```bash
+cd apify-actor
+apify push
 ```
 
 ### Next.js app (`packages/app`)
@@ -206,11 +212,27 @@ docker push docker.io/wittydeveloper/inngest-render-indexer:0.5
 **Run the Next.js app locally**
 
 ```bash
+cd packages/app
 pnpm dev
 ```
 
-**Start the Inngest Dev Server**
+## Migration from Inngest to Apify
 
-```bash
-npx inngest-cli@latest dev
-```
+This project was originally built using Inngest for agent orchestration. It has been migrated to use Apify for web scraping and automation. Here are the key changes:
+
+1. **Replaced Inngest with Apify:**
+   - Removed Inngest-related code and dependencies.
+   - Added Apify Actor for scraping the Sendai API documentation.
+   - Added Apify client integration in the Next.js app.
+
+2. **Changed Data Source:**
+   - Previously: Scraped Hacker News and stored in a vector database.
+   - Now: Scrapes the Sendai API documentation directly when needed.
+
+3. **Updated API Routes:**
+   - Added `/api/apify` route to handle Apify webhook callbacks.
+   - Updated `/api/questions` and `/api/preview` routes to use Apify instead of Inngest.
+
+4. **Environment Variables:**
+   - Removed Inngest-related environment variables.
+   - Added Apify-related environment variables (`APIFY_API_TOKEN`, `SENDAI_ACTOR_ID`).

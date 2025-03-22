@@ -9,7 +9,7 @@ export const apifyClient = new ApifyClient({
 export const SENDAI_ACTOR_ID = process.env.SENDAI_ACTOR_ID || 'your-actor-id';
 
 // Default model to use with OpenRouter
-export const DEFAULT_MODEL = 'anthropic/claude-3-opus';
+export const DEFAULT_MODEL = process.env.DEFAULT_MODEL || 'anthropic/claude-3-opus';
 
 // Function to run the Sendai documentation agent
 export async function runSendaiActor(question: string, model: string = DEFAULT_MODEL) {

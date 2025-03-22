@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getQuestions, createQuestion, deleteQuestion } from "@/lib/db";
 import { apifyClient, SENDAI_ACTOR_ID, runSendaiActor } from "@/lib/apify";
-import { computeNextRunDate } from "@/lib/utils";
+import { computeNextRunDate, frequencyToCron } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -18,7 +18,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { interest_id, question, frequency } = await request.json();
+    const { interest_id, question, frequency, model } = await request.json();
 
     if (!interest_id || !question || !frequency) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     // Schedule the Apify Actor run
     try {
       // First, run the actor immediately
-      const answer = await runSendaiActor(question);
+      const answer = await runSendaiActor(question, model);
       console.log('Initial actor run completed with answer:', answer);
       
       // Then, schedule a future run using Apify's schedules
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
           actorId: SENDAI_ACTOR_ID,
           input: {
             question,
+            model,
           },
         }],
       });

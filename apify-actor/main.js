@@ -2,11 +2,15 @@ import { Actor } from 'apify';
 import { CheerioCrawler } from 'crawlee';
 import fetch from 'node-fetch';
 import fs from 'fs';
+import { URL } from 'url';
 
 Actor.main(async () => {
   let input = await Actor.getInput();
   console.log('Input:', input);
-  // input will be the question
+  
+  // Get the root website URL from input or use default
+  const rootWebsite = input.rootWebsite || 'https://docs.sendai.fun';
+  console.log('Root website:', rootWebsite);
 
   const crawler = new CheerioCrawler({
     async requestHandler({ request, response, body, $ }) {
@@ -68,84 +72,64 @@ Actor.main(async () => {
     },
   });
 
-    await crawler.run([
-  "https://docs.sendai.fun/v0/classes/SolanaAgentKit",
-  "https://docs.sendai.fun/v0/examples/claude_mcp",
-  "https://docs.sendai.fun/v0/examples/discord_agent",
-  "https://docs.sendai.fun/v0/examples/langgraph",
-  "https://docs.sendai.fun/v0/examples/market_maker",
-  "https://docs.sendai.fun/v0/examples/nextjs",
-  "https://docs.sendai.fun/v0/examples/persistent_agent",
-  "https://docs.sendai.fun/v0/examples/telegram",
-  "https://docs.sendai.fun/v0/features/defi-integration/adrena",
-  "https://docs.sendai.fun/v0/features/defi-integration/alldomains",
-  "https://docs.sendai.fun/v0/features/defi-integration/allora",
-  "https://docs.sendai.fun/v0/features/defi-integration/debridge",
-  "https://docs.sendai.fun/v0/features/defi-integration/dexscreener",
-  "https://docs.sendai.fun/v0/features/defi-integration/drift",
-  "https://docs.sendai.fun/v0/features/defi-integration/flashtrade",
-  "https://docs.sendai.fun/v0/features/defi-integration/fluxbeam",
-  "https://docs.sendai.fun/v0/features/defi-integration/jupiter_exchange_swaps",
-  "https://docs.sendai.fun/v0/features/defi-integration/launch_pumpfun",
-  "https://docs.sendai.fun/v0/features/defi-integration/manifest_market",
-  "https://docs.sendai.fun/v0/features/defi-integration/meteora",
-  "https://docs.sendai.fun/v0/features/defi-integration/openbook_market",
-  "https://docs.sendai.fun/v0/features/defi-integration/orca_whirlpool",
-  "https://docs.sendai.fun/v0/features/defi-integration/pyth",
-  "https://docs.sendai.fun/v0/features/defi-integration/raydium_pools",
-  "https://docs.sendai.fun/v0/features/defi-integration/sns",
-  "https://docs.sendai.fun/v0/features/defi-integration/solutiofi",
-  "https://docs.sendai.fun/v0/features/defi-integration/switchboard",
-  "https://docs.sendai.fun/v0/features/defi-integration/voltr",
-  "https://docs.sendai.fun/v0/features/nft-management/3land_create_manage",
-  "https://docs.sendai.fun/v0/features/nft-management/deploy_collection",
-  "https://docs.sendai.fun/v0/features/nft-management/mint_nft",
-  "https://docs.sendai.fun/v0/features/nft-management/tensor_nft",
-  "https://docs.sendai.fun/v0/features/non-financial/gibwork_bounties",
-  "https://docs.sendai.fun/v0/features/solana-blinks/jupsol_staking",
-  "https://docs.sendai.fun/v0/features/solana-blinks/lulo",
-  "https://docs.sendai.fun/v0/features/solana-blinks/send_arcade_rps",
-  "https://docs.sendai.fun/v0/features/solana-blinks/solayer_restaking",
-  "https://docs.sendai.fun/v0/features/squads/squads_operations",
-  "https://docs.sendai.fun/v0/features/token-operations/balance_check",
-  "https://docs.sendai.fun/v0/features/token-operations/coingecko",
-  "https://docs.sendai.fun/v0/features/token-operations/deploy_spl_metaplex",
-  "https://docs.sendai.fun/v0/features/token-operations/rugcheck_token_retrieval",
-  "https://docs.sendai.fun/v0/features/token-operations/stake_sol",
-  "https://docs.sendai.fun/v0/features/token-operations/tiplink_operations",
-  "https://docs.sendai.fun/v0/features/token-operations/transfer_assets",
-  "https://docs.sendai.fun/v0/functions/createSolanaTools",
-  "https://docs.sendai.fun/v0/functions/createVercelAITools",
-  "https://docs.sendai.fun/v0/functions/executeAction",
-  "https://docs.sendai.fun/v0/functions/findAction",
-  "https://docs.sendai.fun/v0/functions/getActionExamples",
-  "https://docs.sendai.fun/v0/guides/add_your_own_tool",
-  "https://docs.sendai.fun/v0/guides/setup_locally",
-  "https://docs.sendai.fun/v0/guides/test_it_out",
-  "https://docs.sendai.fun/v0/interfaces/Action",
-  "https://docs.sendai.fun/v0/interfaces/ActionExample",
-  "https://docs.sendai.fun/v0/interfaces/BatchOrderPattern",
-  "https://docs.sendai.fun/v0/interfaces/CollectionDeployment",
-  "https://docs.sendai.fun/v0/interfaces/CollectionOptions",
-  "https://docs.sendai.fun/v0/interfaces/Config",
-  "https://docs.sendai.fun/v0/interfaces/Creator",
-  "https://docs.sendai.fun/v0/interfaces/FetchPriceResponse",
-  "https://docs.sendai.fun/v0/interfaces/FlashCloseTradeParams",
-  "https://docs.sendai.fun/v0/interfaces/FlashTradeParams",
-  "https://docs.sendai.fun/v0/interfaces/GibworkCreateTaskReponse",
-  "https://docs.sendai.fun/v0/interfaces/JupiterTokenData",
-  "https://docs.sendai.fun/v0/interfaces/LuloAccountDetailsResponse",
-  "https://docs.sendai.fun/v0/interfaces/MintCollectionNFTResponse",
-  "https://docs.sendai.fun/v0/interfaces/OrderParams",
-  "https://docs.sendai.fun/v0/interfaces/PumpFunTokenOptions",
-  "https://docs.sendai.fun/v0/interfaces/PumpfunLaunchResponse",
-  "https://docs.sendai.fun/v0/interfaces/PythFetchPriceResponse",
-  "https://docs.sendai.fun/v0/interfaces/PythPriceFeedIDItem",
-  "https://docs.sendai.fun/v0/interfaces/PythPriceItem",
-  "https://docs.sendai.fun/v0/interfaces/TokenCheck",
-  "https://docs.sendai.fun/v0/introduction",
-  "https://docs.sendai.fun/v0/quickstart",
-        'https://docs.sendai.fun/v0/introduction']);
+    // Function to fetch and parse sitemap.xml
+    async function fetchSitemapUrls(rootUrl) {
+      try {
+        // Normalize the root URL
+        if (!rootUrl.endsWith('/')) {
+          rootUrl = rootUrl + '/';
+        }
+        
+        const sitemapUrl = new URL('sitemap.xml', rootUrl).toString();
+        console.log(`Fetching sitemap from: ${sitemapUrl}`);
+        
+        const response = await fetch(sitemapUrl);
+        
+        if (!response.ok) {
+          console.error(`Failed to fetch sitemap.xml: ${response.status} ${response.statusText}`);
+          // Return a fallback URL if sitemap.xml is not found
+          return [rootUrl];
+        }
+        
+        const sitemapXml = await response.text();
+        
+        // Create a Cheerio instance to parse the XML
+        const cheerio = require('cheerio');
+        const $ = cheerio.load(sitemapXml, {
+          xmlMode: true
+        });
+        
+        // Extract URLs from the sitemap
+        const urls = [];
+        $('url > loc').each((_, element) => {
+          const url = $(element).text().trim();
+          if (url) {
+            urls.push(url);
+          }
+        });
+        
+        console.log(`Found ${urls.length} URLs in sitemap.xml`);
+        
+        // If no URLs were found, return the root URL as a fallback
+        if (urls.length === 0) {
+          console.warn('No URLs found in sitemap.xml, using root URL as fallback');
+          return [rootUrl];
+        }
+        
+        return urls;
+      } catch (error) {
+        console.error('Error fetching or parsing sitemap.xml:', error);
+        // Return the root URL as a fallback
+        return [rootUrl];
+      }
+    }
+    
+    // Fetch URLs from sitemap.xml
+    const urlsToScrape = await fetchSitemapUrls(rootWebsite);
+    console.log(`Will scrape ${urlsToScrape.length} URLs`);
+    
+    // Run the crawler with the URLs from the sitemap
+    await crawler.run(urlsToScrape);
 
   // Implement agent logic using OpenAI directly
   const dataset = await Actor.openDataset();
@@ -194,13 +178,16 @@ ${listsText}
   }).join('\n\n');
   
   input = {"question": "What is sendai"};
-  // Get the user's question, model, and preview flag from the input
+  // Get the user's question, context, previous response, model, and preview flag from the input
   const userQuestion = input.question || 'What is Sendai?';
+  const userContext = input.userContext || '';
+  const previousResponse = input.previousResponse || '';
   // Default to Gemini Pro for its 2 million token context window
   const model = input.model || 'google/gemini-2.0-pro-exp-02-05:free';
   const isPreview = input.preview === true;
   
   console.log('Processing user question:', userQuestion);
+  console.log('User context:', userContext || '(None provided)');
   console.log('Using model:', model);
   console.log('Preview mode:', isPreview ? 'Yes' : 'No');
   
@@ -236,10 +223,15 @@ The documentation should:
 
 The user's question or topic of interest is: "${userQuestion}"
 
+${userContext ? `The user's context/profile is: ${userContext}
+Tailor the documentation to this user profile, adjusting the technical depth, examples, and explanations accordingly.` : ''}
+
 Focus on creating documentation that thoroughly addresses this question/topic while providing necessary context from the scraped content.
 
 If the scraped content doesn't contain enough information to create documentation about the requested topic, create the best documentation possible based on available information. Don't mention this is scraped content and also don't have any preambles about this being markdown. Just give the content.`
           },
+          // Add previous response if provided
+          ...(previousResponse ? [{ role: 'assistant', content: previousResponse }] : []),
           {
             role: 'user',
             content: userQuestion
@@ -256,14 +248,17 @@ If the scraped content doesn't contain enough information to create documentatio
     
     const documentation = completion.choices[0].message.content;
     fs.writeFileSync('filename.txt', documentation);
-    console.log(documentation);
     
     // Store the documentation in the Key-Value store
     await Actor.setValue('documentation', documentation);
     
+    console.log('Documentation generated and stored successfully');
+    
     // Return the documentation as the Actor's output
     await Actor.pushData({
       question: userQuestion,
+      userContext: userContext || null,
+      previousResponse: documentation, // Store current documentation as previousResponse for next iteration
       documentation: documentation,
       model: model,
       preview: isPreview

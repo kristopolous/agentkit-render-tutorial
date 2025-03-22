@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "apify": "^3.1.13",
+    "apify-cli": "^0.21.2",
     "cheerio": "^1.0.0-rc.12",
     "crawlee": "*",
     "node-fetch": "^3.3.2",

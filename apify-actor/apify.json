@@ -1,9 +1,0 @@
-{
-  "name": "sendai-documentation-agent",
-  "version": "0.0.1",
-  "buildTag": "latest",
-  "env": {
-    "OPENROUTER_API_KEY": ""
-  },
-  "description": "An Actor that scrapes the Sendai API documentation and answers questions about it using OpenAI's GPT-4 model."
-}

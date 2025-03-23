@@ -9,7 +9,7 @@
   --accent-neon-glow: 0 0 10px rgba(0, 247, 255, 0.7);
   --accent-purple-glow: 0 0 10px rgba(189, 0, 255, 0.7);
   --sidebar-width: 280px;
-  --video-height: 150px;
+  --video-height: 320px;
   --navbar-height: 60px;
 }
 
@@ -382,6 +382,8 @@ body {
   padding: 40px;
   background-color: var(--dark-bg-secondary);
   min-height: calc(100vh - var(--navbar-height));
+  width: calc(100% - var(--sidebar-width));
+  box-sizing: border-box;
 }
 
 .docs-container {
@@ -393,6 +395,36 @@ body {
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+}
+
+.slide-up-container {
+  transition: all 0.5s ease;
+  max-height: 300px;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.slide-up-container.hidden {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.markdown-content {
+  display: block;
+  opacity: 1;
+  max-height: 5000px;
+  transition: all 0.5s ease;
+  overflow: hidden;
+}
+
+.markdown-content.hidden {
+  display: none;
+  opacity: 0;
+  max-height: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .docs-title h1 {
@@ -600,7 +632,7 @@ body {
 }
 .call {
   text-align: center;
-  max-width: 10rem;
+  max-width: 20rem;
 }
 .call button {
   margin-bottom: 1rem;

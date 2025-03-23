@@ -82,9 +82,6 @@ function PhoneCallRequest({ convo, setConvo }) {
         )}
         {!convo && (
           <>
-            <button type="submit" disabled={isLoading} className="call-button">
-              {isLoading ? "Requesting..." : "Call me"}
-            </button>
             <button
               type="submit"
               className="call-button"

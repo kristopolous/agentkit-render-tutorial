@@ -111,7 +111,7 @@ function MainContent({ selectedRole }) {
   };
 
   return (
-    <div className="main-content">
+    <div className="main-content" style={{ width: '100%', maxWidth: '100%' }}>
       <div
         ref={headerRef}
         className="docs-title"
@@ -128,7 +128,7 @@ function MainContent({ selectedRole }) {
       >
         <img src="furnicular.png" alt="Furnicular Logo" className="logo" />
         <h1 style={{ color: '#AAA'}}>
-          Welcome to Furnicular, the easy ramp-up for devs
+          The easy ramp-up for devs
         </h1>
         <input
           type="text"
@@ -137,7 +137,7 @@ function MainContent({ selectedRole }) {
           onChange={handleUrlChange}
           className="documentation-input"
         />
-        <div className="call" style={{ marginTop: '20px', maxWidth: '600px', margin: '20px auto' }}>
+        <div className="call" style={{ marginTop: '20px', width: '100%', margin: '20px auto' }}>
           {/* Video container - shows placeholder or iframe based on convo state */}
           <div className="video-container" style={{ marginBottom: '20px' }}>
             {!convo ? (
@@ -149,8 +149,7 @@ function MainContent({ selectedRole }) {
           
           {/* Phone Call Request component for video call functionality */}
           <PhoneCallRequest convo={convo} setConvo={setConvo} />
-          
-          {/* Markdown content - shown after video starts */}
+          </div> 
           {convo && (
             <>
               {markdownHtml && (
@@ -162,7 +161,7 @@ function MainContent({ selectedRole }) {
               )}
             </>
           )}
-        </div>
+        
       </div>
     </div>
   );

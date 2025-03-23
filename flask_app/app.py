@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from apify_client import ApifyClient
-from daily import Daily
+from daily import Dailyw
 from daily import EventHandler, CallClient
 import time
 import sys
@@ -63,7 +63,7 @@ class RoomHandler(EventHandler):
        if(message["event_type"]=="conversation.utterance"):
            print(f"Incoming app message from {sender}: {message['properties']['speech']}")
 
-
+@app.route('/join', methods=['POST'])
 def join_room(url):
    global call_client
    try:
@@ -74,11 +74,6 @@ def join_room(url):
    except Exception as e:
        print(f"Error joining room: {e}")
        raise
-
-
-def send_message(message):
-   global call_client
-   call_client.send_app_message(message)
 
 
 def run_main(url: str):

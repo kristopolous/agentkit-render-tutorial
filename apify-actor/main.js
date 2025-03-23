@@ -266,7 +266,4 @@ If the scraped content doesn't contain enough information to create documentatio
   } catch (error) {
     console.error('Error generating response with OpenAI:', error);
   }
-  
-  // Note: Email sending has been replaced with file storage as per requirements
-  // Scheduling is handled by the Apify schedules API in the Next.js app
 });

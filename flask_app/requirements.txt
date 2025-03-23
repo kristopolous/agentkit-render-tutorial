@@ -1,0 +1,4 @@
+Flask
+apify-client
+markdown
+daily-python

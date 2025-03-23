@@ -44,6 +44,9 @@ function PhoneCallRequest({ convo, setConvo }) {
         "Call requested successfully. You will receive a call shortly."
       );
       setPhoneNumber("");
+      
+      // Automatically start the video call after successful phone request
+      setConvo(true);
     } catch (error) {
       console.error("Error requesting call:", error);
       setMessage("Failed to request call. Please try again.");

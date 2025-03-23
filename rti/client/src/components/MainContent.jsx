@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { marked } from "marked";
+import VideoPlaceholder from "./VideoPlaceholder";
+import PhoneCallRequest from "./PhoneCallRequest";
+import Conversation from "./Conversation";
 
 function MainContent({ selectedRole }) {
   const [markdownSource, setMarkdownSource] = useState("");
@@ -8,6 +11,9 @@ function MainContent({ selectedRole }) {
   const [documentationUrl, setDocumentationUrl] = useState("");
   const [convo, setConvo] = useState(false);
   const [markdownHtml, setMarkdownHtml] = useState("");
+  const [meetingID, setMeetingID] = useState("");
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const headerRef = useRef(null);
 
     // Function to fetch and convert markdown content
     const fetchMarkdownContent = async () => {
@@ -68,11 +74,20 @@ function MainContent({ selectedRole }) {
   window.ss = startCalla;
   
   const startCall = () => {
+    // Start the Tavus video call
     setConvo(true);
     fetchMarkdownContent();
+    
+    // Slide up the header
+    setHeaderVisible(false);
+    
+    // If there's a Tavus video API or element to trigger, it would go here
+    if (window.tavusPlayer && typeof window.tavusPlayer.play === 'function') {
+      window.tavusPlayer.play();
+    }
   };
 
-  // Listen for markdown rendering events
+  // Listen for markdown rendering events and fetch markdown when convo changes
   useEffect(() => {
     const handleMarkdownRender = (event) => {
       setMarkdownSource(event.detail.originalMarkdown);
@@ -81,10 +96,15 @@ function MainContent({ selectedRole }) {
 
     window.addEventListener("markdown-render", handleMarkdownRender);
 
+    // Fetch markdown content when convo state changes to true
+    if (convo) {
+      fetchMarkdownContent();
+    }
+
     return () => {
       window.removeEventListener("markdown-render", handleMarkdownRender);
     };
-  }, []);
+  }, [convo]);
 
   const handleUrlChange = (event) => {
     setDocumentationUrl(event.target.value);
@@ -93,8 +113,18 @@ function MainContent({ selectedRole }) {
   return (
     <div className="main-content">
       <div
+        ref={headerRef}
         className="docs-title"
-        style={{ display: "block", textAlign: "center" }}
+        style={{
+          display: "block",
+          textAlign: "center",
+          transition: "transform 0.5s ease-out, opacity 0.5s ease-out, height 0.5s ease-out",
+          transform: headerVisible ? "translateY(0)" : "translateY(-100px)",
+          opacity: headerVisible ? 1 : 0,
+          height: headerVisible ? "auto" : "0",
+          overflow: "hidden",
+          marginBottom: headerVisible ? "20px" : "0"
+        }}
       >
         <img src="furnicular.png" alt="Furnicular Logo" className="logo" />
         <h1 style={{ color: '#AAA'}}>
@@ -108,20 +138,19 @@ function MainContent({ selectedRole }) {
           className="documentation-input"
         />
         <div className="call" style={{ marginTop: '20px', maxWidth: '600px', margin: '20px auto' }}>
-          {!convo && (
-            <button
-              className="login-button start"
-              onClick={startCall}
-              style={{
-                display: 'block',
-                margin: '0 auto 20px auto',
-                width: '200px'
-              }}
-            >
-              Get Started
-            </button>
-          )}
-
+          {/* Video container - shows placeholder or iframe based on convo state */}
+          <div className="video-container" style={{ marginBottom: '20px' }}>
+            {!convo ? (
+              <VideoPlaceholder />
+            ) : (
+              <Conversation meetingID={meetingID} setMeetingID={setMeetingID} />
+            )}
+          </div>
+          
+          {/* Phone Call Request component for video call functionality */}
+          <PhoneCallRequest convo={convo} setConvo={setConvo} />
+          
+          {/* Markdown content - shown after video starts */}
           {convo && (
             <>
               {markdownHtml && (
@@ -131,7 +160,7 @@ function MainContent({ selectedRole }) {
                   dangerouslySetInnerHTML={{ __html: markdownHtml }}
                 />
               )}
-          </>
+            </>
           )}
         </div>
       </div>

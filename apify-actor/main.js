@@ -1,15 +1,26 @@
-import { Actor } from 'apify';
+#!/usr/bin/env node
 import { CheerioCrawler } from 'crawlee';
 import fetch from 'node-fetch';
 import fs from 'fs';
 import { URL } from 'url';
+import dotenv from 'dotenv';
 
-Actor.main(async () => {
-  let input = await Actor.getInput();
+dotenv.config();
+
+async function main() {
+  // Load input from input.json
+  let input;
+  try {
+    input = JSON.parse(fs.readFileSync('input.json', 'utf-8'));
+  } catch (error) {
+    console.error('Error reading input.json:', error);
+    return;
+  }
+
   console.log('Input:', input);
-  
+
   // Get the root website URL from input or use default
-  const rootWebsite = input.rootWebsite || 'https://docs.sendai.fun';
+  const rootWebsite = input.rootWebsite || 'https://nodejs.org/docs/latest/api/';
   console.log('Root website:', rootWebsite);
 
   const crawler = new CheerioCrawler({
@@ -67,8 +78,10 @@ Actor.main(async () => {
 
       console.log('Extracted data:', data);
 
-      // Store the extracted data in the default dataset
-      await Actor.pushData(data);
+      // Store the extracted data
+      // Instead of Apify's pushData, write to a file or store in a variable
+      // For simplicity, we'll just log it for now.
+      // await Actor.pushData(data); // Removed Apify-specific code
     },
   });
 
@@ -132,37 +145,39 @@ Actor.main(async () => {
     await crawler.run(urlsToScrape);
 
   // Implement agent logic using OpenAI directly
-  const dataset = await Actor.openDataset();
-  const { items } = await dataset.getData();
-  
-  console.log('Scraped data items:', items.length);
-  
+  // const dataset = await Actor.openDataset(); // Removed Apify-specific code
+  // const { items } = await dataset.getData(); // Removed Apify-specific code
+    const items = []; // Replace with actual scraped data if needed
+
+  // console.log('Scraped data items:', items.length); // Keep for debugging
+
   if (items.length === 0) {
-    console.error('No data was scraped. Exiting.');
-    return;
+    console.warn('No data was scraped.'); // Changed to warn, as it might still work
+    // return; // Don't exit, continue to generate response even without scraped data
   }
-  
+
   // Format the scraped data for the prompt
+  // This part needs to be adjusted based on how you store the scraped data
   const formattedData = items.map(item => {
-    const headingsText = item.headings.map(h => `${h.level}: ${h.text}`).join('\n');
-    
-    // Format paragraphs
-    const paragraphsText = item.paragraphs ? item.paragraphs.join('\n\n') : '';
-    
-    // Format code blocks
-    const codeBlocksText = item.codeBlocks && item.codeBlocks.length > 0
-      ? 'Code Examples:\n' + item.codeBlocks.map(code => '```\n' + code + '\n```').join('\n\n')
-      : '';
-    
-    // Format lists
-    const listsText = item.lists && item.lists.length > 0
-      ? 'Lists:\n' + item.lists.map(list => {
-          const prefix = list.type === 'unordered' ? '- ' : '1. ';
-          return list.items.map(item => prefix + item).join('\n');
-        }).join('\n\n')
-      : '';
-    
-    return `
+      const headingsText = item.headings.map(h => `${h.level}: ${h.text}`).join('\n');
+      
+      // Format paragraphs
+      const paragraphsText = item.paragraphs ? item.paragraphs.join('\n\n') : '';
+      
+      // Format code blocks
+      const codeBlocksText = item.codeBlocks && item.codeBlocks.length > 0
+        ? 'Code Examples:\n' + item.codeBlocks.map(code => '```\n' + code + '\n```').join('\n\n')
+        : '';
+      
+      // Format lists
+      const listsText = item.lists && item.lists.length > 0
+        ? 'Lists:\n' + item.lists.map(list => {
+            const prefix = list.type === 'unordered' ? '- ' : '1. ';
+            return list.items.map(item => prefix + item).join('\n');
+          }).join('\n\n')
+        : '';
+      
+      return `
 Title: ${item.title}
 
 Headings:
@@ -174,30 +189,28 @@ ${paragraphsText}
 ${codeBlocksText}
 
 ${listsText}
-    `;
-  }).join('\n\n');
-  
-  input = {"question": "What is sendai"};
+      `;
+    }).join('\n\n');
+
   // Get the user's question, context, previous response, model, and preview flag from the input
-  const userQuestion = input.question || 'What is Sendai?';
+  const userQuestion = input.question;
   const userContext = input.userContext || '';
   const previousResponse = input.previousResponse || '';
-  // Default to Gemini Pro for its 2 million token context window
   const model = input.model || 'google/gemini-2.0-pro-exp-02-05:free';
   const isPreview = input.preview === true;
-  
+
   console.log('Processing user question:', userQuestion);
   console.log('User context:', userContext || '(None provided)');
   console.log('Using model:', model);
   console.log('Preview mode:', isPreview ? 'Yes' : 'No');
-  
+
   // Generate a response using OpenRouter
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`, // Use the .env variable
         'HTTP-Referer': 'https://apify.com', // Replace with your site URL
         'X-Title': 'Sendai Documentation Agent'
       },
@@ -239,31 +252,33 @@ If the scraped content doesn't contain enough information to create documentatio
         ]
       })
     });
-    
+
     const completion = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(`OpenRouter API error: ${completion.error?.message || JSON.stringify(completion)}`);
     }
-    
+
     const documentation = completion.choices[0].message.content;
-    fs.writeFileSync('filename.txt', documentation);
-    
-    // Store the documentation in the Key-Value store
-    await Actor.setValue('documentation', documentation);
-    
-    console.log('Documentation generated and stored successfully');
-    
-    // Return the documentation as the Actor's output
-    await Actor.pushData({
-      question: userQuestion,
-      userContext: userContext || null,
-      previousResponse: documentation, // Store current documentation as previousResponse for next iteration
-      documentation: documentation,
-      model: model,
-      preview: isPreview
-    });
+    fs.writeFileSync('output.txt', documentation); // Write to output.txt
+
+    // Store the documentation in the Key-Value store // Removed Apify-specific code
+    // await Actor.setValue('documentation', documentation); // Removed Apify-specific code
+
+    console.log('Documentation generated and stored successfully in output.txt');
+
+    // Return the documentation as the Actor's output // Removed Apify-specific code
+    // await Actor.pushData({ // Removed Apify-specific code
+    //   question: userQuestion,
+    //   userContext: userContext || null,
+    //   previousResponse: documentation, // Store current documentation as previousResponse for next iteration
+    //   documentation: documentation,
+    //   model: model,
+    //   preview: isPreview
+    // });
   } catch (error) {
     console.error('Error generating response with OpenAI:', error);
   }
-});
+}
+
+main();

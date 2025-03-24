@@ -3,11 +3,10 @@
   "version": "0.0.1",
   "type": "module",
   "dependencies": {
-    "apify": "^3.1.13",
-    "apify-cli": "^0.21.2",
     "cheerio": "^1.0.0-rc.12",
     "crawlee": "*",
     "node-fetch": "^3.3.2",
+    "dotenv": "^16.4.5",
     "pg": "^8.11.3"
   },
   "scripts": {
